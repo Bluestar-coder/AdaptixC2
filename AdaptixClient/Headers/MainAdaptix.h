@@ -7,6 +7,7 @@ namespace oclero::qlementine {
     class QlementineStyle;
 }
 
+class QTranslator;
 class Extender;
 class Settings;
 class Storage;
@@ -14,6 +15,7 @@ class MainUI;
 class AuthProfile;
 
 class MainAdaptix : public QWidget {
+    Q_DECLARE_TR_FUNCTIONS(MainAdaptix)
 
 public:
     MainUI*   mainUI   = nullptr;
@@ -21,6 +23,8 @@ public:
     Extender* extender = nullptr;
     Settings* settings = nullptr;
     oclero::qlementine::QlementineStyle* qlementineStyle = nullptr;
+    QTranslator* appTranslator = nullptr;
+    QTranslator* qtTranslator = nullptr;
 
     explicit MainAdaptix();
     ~MainAdaptix() override;
@@ -31,6 +35,8 @@ public:
     void NewProject() const;
     void SetApplicationTheme() const;
     void ApplyApplicationFont() const;
+    void InstallLanguage(const QString& language);
+    static QString NormalizeLanguage(const QString& language);
 
     static AuthProfile* Login();
 };

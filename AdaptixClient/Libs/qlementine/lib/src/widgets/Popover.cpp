@@ -69,7 +69,9 @@ public:
     const auto type = e->type();
     switch (type) {
       case QEvent::LayoutRequest:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
       case QEvent::DevicePixelRatioChange:
+#endif
         callResize();
         break;
       default:

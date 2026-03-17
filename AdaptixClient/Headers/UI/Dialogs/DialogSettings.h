@@ -26,6 +26,8 @@ Q_OBJECT
     QLabel*      themeLabel        = nullptr;
     QComboBox*   themeCombo        = nullptr;
     QPushButton* themeImportBtn    = nullptr;
+    QLabel*      languageLabel     = nullptr;
+    QComboBox*   languageCombo     = nullptr;
     QLabel*      fontSizeLabel     = nullptr;
     QSpinBox*    fontSizeSpin      = nullptr;
     QLabel*      fontFamilyLabel   = nullptr;

@@ -6,30 +6,84 @@
 #include <Client/Storage.h>
 #include <MainAdaptix.h>
 #include <Utils/NonBlockingDialogs.h>
+#include <QCoreApplication>
 
 namespace {
 
-static QListWidgetItem* makeSectionHeader(const QString &title)
+constexpr int kSectionHeaderRole = Qt::UserRole;
+constexpr int kSubscriptionKeyRole = Qt::UserRole + 1;
+
+QListWidgetItem* makeSectionHeaderItem(const QString& title)
 {
-    auto *item = new QListWidgetItem(title);
+    auto* item = new QListWidgetItem(title);
     QFont f = item->font();
     f.setBold(true);
     item->setFont(f);
     item->setFlags(Qt::ItemIsEnabled);
-    item->setData(Qt::UserRole, true);
+    item->setData(kSectionHeaderRole, true);
     return item;
 }
 
-static bool isSectionHeaderItem(const QListWidgetItem *item)
+bool isSectionHeaderItem(const QListWidgetItem* item)
 {
-    return item && item->data(Qt::UserRole).toBool();
+    return item && item->data(kSectionHeaderRole).toBool();
+}
+
+QString subscriptionDisplayName(DialogSubscriptions* dialog, const QString& key)
+{
+    if (key == "chat_history")
+        return QCoreApplication::translate("DialogSubscriptions", "Chat history");
+    if (key == "downloads_history")
+        return QCoreApplication::translate("DialogSubscriptions", "Downloads history");
+    if (key == "screenshot_history")
+        return QCoreApplication::translate("DialogSubscriptions", "Screenshots history");
+    if (key == "credentials_history")
+        return QCoreApplication::translate("DialogSubscriptions", "Credentials history");
+    if (key == "targets_history")
+        return QCoreApplication::translate("DialogSubscriptions", "Targets history");
+    if (key == "console_history")
+        return QCoreApplication::translate("DialogSubscriptions", "Console history");
+    if (key == "tasks_history")
+        return QCoreApplication::translate("DialogSubscriptions", "Tasks history");
+    if (key == "chat_realtime")
+        return QCoreApplication::translate("DialogSubscriptions", "Chat");
+    if (key == "downloads_realtime")
+        return QCoreApplication::translate("DialogSubscriptions", "Downloads");
+    if (key == "screenshot_realtime")
+        return QCoreApplication::translate("DialogSubscriptions", "Screenshots");
+    if (key == "credentials_realtime")
+        return QCoreApplication::translate("DialogSubscriptions", "Credentials");
+    if (key == "targets_realtime")
+        return QCoreApplication::translate("DialogSubscriptions", "Targets");
+    if (key == "notifications")
+        return QCoreApplication::translate("DialogSubscriptions", "Notifications");
+    if (key == "tunnels")
+        return QCoreApplication::translate("DialogSubscriptions", "Tunnels");
+    if (key == "tasks_manager")
+        return QCoreApplication::translate("DialogSubscriptions", "Tasks manager");
+
+    return key;
+}
+
+QListWidgetItem* makeSubscriptionItem(DialogSubscriptions* dialog, const QString& key)
+{
+    auto* item = new QListWidgetItem(subscriptionDisplayName(dialog, key));
+    item->setData(kSubscriptionKeyRole, key);
+    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+    item->setCheckState(Qt::Unchecked);
+    return item;
+}
+
+QString subscriptionKey(const QListWidgetItem* item)
+{
+    return item ? item->data(kSubscriptionKeyRole).toString() : QString();
 }
 
 }
 
 void DialogSubscriptions::createUI()
 {
-    setWindowTitle("Subscription Settings");
+    setWindowTitle(tr("Subscription Settings"));
     setProperty("Main", "base");
     setFixedSize(500, 500);
 
@@ -37,12 +91,12 @@ void DialogSubscriptions::createUI()
     mainLayout->setContentsMargins(10, 10, 10, 10);
     mainLayout->setSpacing(10);
 
-    auto historyLabel = new QLabel("History:", this);
+    auto historyLabel = new QLabel(tr("History:"), this);
     QFont boldFont = historyLabel->font();
     boldFont.setBold(true);
     historyLabel->setFont(boldFont);
 
-    auto realtimeLabel = new QLabel("RealTime:", this);
+    auto realtimeLabel = new QLabel(tr("Real-time:"), this);
     realtimeLabel->setFont(boldFont);
 
     historyListWidget = new QListWidget(this);
@@ -51,60 +105,48 @@ void DialogSubscriptions::createUI()
     realtimeListWidget = new QListWidget(this);
     realtimeListWidget->setSelectionMode(QAbstractItemView::NoSelection);
 
-    historyListWidget->addItem(makeSectionHeader("Data"));
+    historyListWidget->addItem(makeSectionHeaderItem(tr("Data")));
     for (const QString &cat : {"chat_history", "downloads_history", "screenshot_history", "credentials_history", "targets_history"}) {
-        auto *item = new QListWidgetItem(cat);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-        historyListWidget->addItem(item);
+        historyListWidget->addItem(makeSubscriptionItem(this, cat));
     }
-    historyListWidget->addItem(makeSectionHeader("Agent"));
+    historyListWidget->addItem(makeSectionHeaderItem(tr("Agent")));
     for (const QString &cat : {"console_history", "tasks_history"}) {
-        auto *item = new QListWidgetItem(cat);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-        historyListWidget->addItem(item);
+        historyListWidget->addItem(makeSubscriptionItem(this, cat));
     }
 
-    realtimeListWidget->addItem(makeSectionHeader("Data"));
+    realtimeListWidget->addItem(makeSectionHeaderItem(tr("Data")));
     for (const QString &cat : {"chat_realtime", "downloads_realtime", "screenshot_realtime", "credentials_realtime", "targets_realtime", "notifications", "tunnels"}) {
-        auto *item = new QListWidgetItem(cat);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-        realtimeListWidget->addItem(item);
+        realtimeListWidget->addItem(makeSubscriptionItem(this, cat));
     }
-    realtimeListWidget->addItem(makeSectionHeader("Agent"));
+    realtimeListWidget->addItem(makeSectionHeaderItem(tr("Agent")));
     for (const QString &cat : {"tasks_manager"}) {
-        auto *item = new QListWidgetItem(cat);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-        realtimeListWidget->addItem(item);
+        realtimeListWidget->addItem(makeSubscriptionItem(this, cat));
     }
 
-    consoleTeammodeCheck = new QCheckBox("Console Team Mode", this);
+    consoleTeammodeCheck = new QCheckBox(tr("Console Team Mode"), this);
     consoleTeammodeCheck->setChecked(true);
-    consoleTeammodeCheck->setToolTip("See console output from all operators");
+    consoleTeammodeCheck->setToolTip(tr("See console output from all operators"));
 
-    agentsOnlyActiveCheck = new QCheckBox("Only active agents", this);
-    agentsOnlyActiveCheck->setToolTip("Synchronize only active agents");
+    agentsOnlyActiveCheck = new QCheckBox(tr("Only active agents"), this);
+    agentsOnlyActiveCheck->setToolTip(tr("Synchronize only active agents"));
     agentsOnlyActiveCheck->setEnabled(false);
 
-    tasksOnlyJobsCheck = new QCheckBox("Only JOB tasks", this);
-    tasksOnlyJobsCheck->setToolTip("Synchronize only jobs");
+    tasksOnlyJobsCheck = new QCheckBox(tr("Only JOB tasks"), this);
+    tasksOnlyJobsCheck->setToolTip(tr("Synchronize only jobs"));
     tasksOnlyJobsCheck->setEnabled(false);
 
-    syncInactiveAgentsButton = new QPushButton("Sync inactive agents", this);
+    syncInactiveAgentsButton = new QPushButton(tr("Sync inactive agents"), this);
     syncInactiveAgentsButton->setEnabled(false);
     syncInactiveAgentsButton->setVisible(false);
 
     auto buttonLayout = new QHBoxLayout();
     buttonLayout->setSpacing(10);
 
-    applyButton = new QPushButton("Apply", this);
+    applyButton = new QPushButton(tr("Apply"), this);
     applyButton->setDefault(true);
     applyButton->setFixedWidth(100);
 
-    closeButton = new QPushButton("Close", this);
+    closeButton = new QPushButton(tr("Close"), this);
     closeButton->setFixedWidth(100);
 
     buttonLayout->addStretch();
@@ -195,8 +237,9 @@ void DialogSubscriptions::SetCurrentSubscriptions(const QStringList &subs)
         auto *item = historyListWidget->item(i);
         if (isSectionHeaderItem(item))
             continue;
-        bool active = subs.contains(item->text());
-        bool registered = registeredCategories.contains(item->text());
+        const QString key = subscriptionKey(item);
+        bool active = subs.contains(key);
+        bool registered = registeredCategories.contains(key);
         updateItemState(item, active, registered);
     }
     historyListWidget->blockSignals(false);
@@ -206,8 +249,9 @@ void DialogSubscriptions::SetCurrentSubscriptions(const QStringList &subs)
         auto *item = realtimeListWidget->item(i);
         if (isSectionHeaderItem(item))
             continue;
-        bool active = subs.contains(item->text());
-        bool registered = registeredCategories.contains(item->text());
+        const QString key = subscriptionKey(item);
+        bool active = subs.contains(key);
+        bool registered = registeredCategories.contains(key);
         updateItemState(item, active, registered);
     }
     realtimeListWidget->blockSignals(false);
@@ -250,14 +294,14 @@ void DialogSubscriptions::onApply()
         if (isSectionHeaderItem(item))
             continue;
         if (item->checkState() == Qt::Checked)
-            newSubs.append(item->text());
+            newSubs.append(subscriptionKey(item));
     }
     for (int i = 0; i < realtimeListWidget->count(); ++i) {
         auto *item = realtimeListWidget->item(i);
         if (isSectionHeaderItem(item))
             continue;
         if (item->checkState() == Qt::Checked)
-            newSubs.append(item->text());
+            newSubs.append(subscriptionKey(item));
     }
 
     if (agentsOnlyActiveLocked)
@@ -308,7 +352,7 @@ void DialogSubscriptions::onApply()
                             GlobalClient->storage->UpdateProject(*safeWidget->GetProfile());
                         }
                     } else {
-                        MessageError("Subscribe failed: " + message);
+                        MessageError(QCoreApplication::translate("DialogSubscriptions", "Subscribe failed: %1").arg(message));
                     }
                 });
         }
@@ -352,7 +396,7 @@ void DialogSubscriptions::onSyncInactiveAgents()
                 return;
 
             if (!success) {
-                MessageError("Subscribe failed: " + message);
+                MessageError(QCoreApplication::translate("DialogSubscriptions", "Subscribe failed: %1").arg(message));
                 self->syncInactiveAgentsTriggered = false;
                 self->updateSyncInactiveAgentsButtonState();
                 return;
@@ -382,7 +426,7 @@ void DialogSubscriptions::onItemChanged(QListWidgetItem *item)
     if (isSectionHeaderItem(item))
         return;
 
-    QString cat = item->text();
+    const QString cat = subscriptionKey(item);
     bool registered = registeredCategories.contains(cat);
 
     QListWidget *listWidget = item->listWidget();

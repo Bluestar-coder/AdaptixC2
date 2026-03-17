@@ -132,6 +132,7 @@ protected:
 
 class TargetsTableModel : public QAbstractTableModel
 {
+    Q_DECLARE_TR_FUNCTIONS(TargetsTableModel)
     QVector<TargetData>   targets;
     QHash<QString, int>   idToRow;
 
@@ -196,12 +197,17 @@ public:
         if (role != Qt::DisplayRole || o != Qt::Horizontal)
             return {};
 
-        static QStringList headers = {
-            "Id","Computer","Domain","Address","Tag",
-            "OS","Date","Info"
-        };
-
-        return headers.value(section);
+        switch (section) {
+            case TRC_Id:       return tr("Id");
+            case TRC_Computer: return tr("Computer");
+            case TRC_Domain:   return tr("Domain");
+            case TRC_Address:  return tr("Address");
+            case TRC_Tag:      return tr("Tag");
+            case TRC_Os:       return tr("OS");
+            case TRC_Date:     return tr("Date");
+            case TRC_Info:     return tr("Info");
+            default:           return {};
+        }
     }
 
     void add(const TargetData& item) {
@@ -292,6 +298,7 @@ public:
 
 class TargetsWidget : public DockTab
 {
+    Q_DECLARE_TR_FUNCTIONS(TargetsWidget)
     AdaptixWidget* adaptixWidget  = nullptr;
 
     QGridLayout* mainGridLayout = nullptr;

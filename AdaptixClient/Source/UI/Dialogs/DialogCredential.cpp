@@ -13,42 +13,42 @@ DialogCredential::~DialogCredential() = default;
 void DialogCredential::createUI()
 {
     this->resize(500, 300);
-    this->setWindowTitle( "Add credentials" );
+    this->setWindowTitle(tr("Add credentials"));
     this->setProperty("Main", "base");
 
-    usernameLabel = new QLabel("Username:", this);
+    usernameLabel = new QLabel(tr("Username:"), this);
     usernameInput = new QLineEdit(this);
 
-    passwordLabel = new QLabel("Password:", this);
+    passwordLabel = new QLabel(tr("Password:"), this);
     passwordInput = new QLineEdit(this);
 
-    realmLabel = new QLabel("Realm:", this);
+    realmLabel = new QLabel(tr("Realm:"), this);
     realmInput = new QLineEdit(this);
 
-    typeLabel = new QLabel("Type:", this);
+    typeLabel = new QLabel(tr("Type:"), this);
     typeCombo = new QComboBox(this);
     typeCombo->setEditable(true);
     typeCombo->addItems(QStringList() << "password" << "hash" << "rc4" << "aes128" << "aes256" << "token");
     typeCombo->setCurrentText("");
 
-    tagLabel = new QLabel("Tag:", this);
+    tagLabel = new QLabel(tr("Tag:"), this);
     tagInput = new QLineEdit(this);
 
-    storageLabel = new QLabel("Storage:", this);
+    storageLabel = new QLabel(tr("Storage:"), this);
     storageCombo = new QComboBox(this);
     storageCombo->setEditable(true);
     storageCombo->addItems(QStringList() << "browser" << "dpapi" << "database" << "sam" << "lsass" << "ntds" << "manual");
     storageCombo->setCurrentText("");
 
-    hostLabel = new QLabel("Host:", this);
+    hostLabel = new QLabel(tr("Host:"), this);
     hostInput = new QLineEdit(this);
 
     spacer_1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
     spacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-    createButton = new QPushButton("Save", this);
+    createButton = new QPushButton(tr("Save"), this);
     createButton->setDefault(true);
-    cancelButton = new QPushButton("Cancel", this);
+    cancelButton = new QPushButton(tr("Cancel"), this);
 
     hLayoutBottom = new QHBoxLayout();
     hLayoutBottom->addItem(spacer_1);
@@ -92,7 +92,7 @@ void DialogCredential::StartDialog()
 
 void DialogCredential::SetEditmode(const CredentialData &credentialData)
 {
-    this->setWindowTitle( "Edit credentials" );
+    this->setWindowTitle(tr("Edit credentials"));
     this->credsId = credentialData.CredId;
 
     this->usernameInput->setText(credentialData.Username);

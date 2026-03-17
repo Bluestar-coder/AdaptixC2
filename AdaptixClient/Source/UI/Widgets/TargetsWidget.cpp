@@ -8,9 +8,9 @@
 #include <Utils/CustomElements.h>
 #include <Utils/NonBlockingDialogs.h>
 
-REGISTER_DOCK_WIDGET(TargetsWidget, "Targets", true)
+REGISTER_DOCK_WIDGET(TargetsWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Targets"), true)
 
-TargetsWidget::TargetsWidget(AdaptixWidget* w) : DockTab("Targets", w->GetProfile()->GetProject(), ":/icons/devices"), adaptixWidget(w)
+TargetsWidget::TargetsWidget(AdaptixWidget* w) : DockTab(tr("Targets"), w->GetProfile()->GetProject(), ":/icons/devices"), adaptixWidget(w)
 {
     this->createUI();
 
@@ -92,12 +92,12 @@ void TargetsWidget::createUI()
     searchWidget->setVisible(false);
 
     inputFilter = new QLineEdit(searchWidget);
-    inputFilter->setPlaceholderText("filter: (win | linux) & ^(test)");
+    inputFilter->setPlaceholderText(tr("filter: (win | linux) & ^(test)"));
     inputFilter->setMaximumWidth(300);
 
-    autoSearchCheck = new QCheckBox("auto", searchWidget);
+    autoSearchCheck = new QCheckBox(tr("auto"), searchWidget);
     autoSearchCheck->setChecked(true);
-    autoSearchCheck->setToolTip("Auto search on text change. If unchecked, press Enter to search.");
+    autoSearchCheck->setToolTip(tr("Auto search on text change. If unchecked, press Enter to search."));
 
     hideButton = new ClickableLabel("  x  ");
     hideButton->setCursor(Qt::PointingHandCursor);
@@ -325,7 +325,7 @@ void TargetsWidget::onFilterUpdate() const
 void TargetsWidget::handleTargetsMenu(const QPoint &pos ) const
 {
     auto ctxMenu = QMenu();
-    ctxMenu.addAction("Create", this, &TargetsWidget::onCreateTarget );
+    ctxMenu.addAction(tr("Create"), this, &TargetsWidget::onCreateTarget );
 
     QModelIndex index = tableView->indexAt(pos);
     if (index.isValid()) {
@@ -344,17 +344,17 @@ void TargetsWidget::handleTargetsMenu(const QPoint &pos ) const
         if (topCount > 0)
             ctxMenu.addSeparator();
 
-        ctxMenu.addAction("Edit",   this, &TargetsWidget::onEditTarget );
-        ctxMenu.addAction("Remove", this, &TargetsWidget::onRemoveTarget );
+        ctxMenu.addAction(tr("Edit"),   this, &TargetsWidget::onEditTarget );
+        ctxMenu.addAction(tr("Remove"), this, &TargetsWidget::onRemoveTarget );
         ctxMenu.addSeparator();
 
         int centerCount = adaptixWidget->ScriptManager->AddMenuTargets(&ctxMenu, "TargetsCenter", targets);
         if (centerCount > 0)
             ctxMenu.addSeparator();
 
-        ctxMenu.addAction("Set tag",           this, &TargetsWidget::onSetTag );
-        ctxMenu.addAction("Export to file",    this, &TargetsWidget::onExportTarget );
-        ctxMenu.addAction("Copy to clipboard", this, &TargetsWidget::onCopyToClipboard );
+        ctxMenu.addAction(tr("Set tag"),           this, &TargetsWidget::onSetTag );
+        ctxMenu.addAction(tr("Export to file"),    this, &TargetsWidget::onExportTarget );
+        ctxMenu.addAction(tr("Copy to clipboard"), this, &TargetsWidget::onCopyToClipboard );
         adaptixWidget->ScriptManager->AddMenuTargets(&ctxMenu, "TargetsBottom", targets);
     }
     QPoint globalPos = tableView->mapToGlobal(pos);
@@ -440,7 +440,7 @@ void TargetsWidget::onEditTarget() const
 
     HttpReqTargetEditAsync(jsonData, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Server is not responding" : message);
+            MessageError(message.isEmpty() ? TargetsWidget::tr("Server is not responding") : message);
     });
 }
 
@@ -461,7 +461,7 @@ void TargetsWidget::onRemoveTarget() const
 
     HttpReqTargetRemoveAsync(listId, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Response timeout" : message);
+            MessageError(message.isEmpty() ? TargetsWidget::tr("Response timeout") : message);
     });
 }
 
@@ -486,11 +486,11 @@ void TargetsWidget::onSetTag() const
         return;
 
     bool inputOk;
-    QString newTag = QInputDialog::getText(nullptr, "Set tags", "New tag", QLineEdit::Normal,tag, &inputOk);
+    QString newTag = QInputDialog::getText(nullptr, tr("Set tags"), tr("New tag"), QLineEdit::Normal,tag, &inputOk);
     if ( inputOk ) {
         HttpReqTargetSetTagAsync(listId, newTag, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
             if (!success)
-                MessageError(message.isEmpty() ? "Response timeout" : message);
+                MessageError(message.isEmpty() ? TargetsWidget::tr("Response timeout") : message);
         });
     }
 }
@@ -501,8 +501,8 @@ void TargetsWidget::onExportTarget() const
     if (!idx.isValid()) return;
 
     QInputDialog dialog;
-    dialog.setWindowTitle("Format for saving");
-    dialog.setLabelText("Format:");
+    dialog.setWindowTitle(tr("Format for saving"));
+    dialog.setLabelText(tr("Format:"));
     dialog.setTextValue("%computer%.%domain% - %address%");
     QLineEdit *lineEdit = dialog.findChild<QLineEdit*>();
     if (lineEdit)
@@ -518,14 +518,14 @@ void TargetsWidget::onExportTarget() const
     if (adaptixWidget && adaptixWidget->GetProfile())
         baseDir = QDir(adaptixWidget->GetProfile()->GetProjectDir()).filePath(QStringLiteral("targets.txt"));
 
-    NonBlockingDialogs::getSaveFileName(const_cast<TargetsWidget*>(this), "Save Targets", baseDir, "Text Files (*.txt);;All Files (*)",
+    NonBlockingDialogs::getSaveFileName(const_cast<TargetsWidget*>(this), tr("Save Targets"), baseDir, tr("Text Files (*.txt);;All Files (*)"),
         [this, format](const QString& fileName) {
             if (fileName.isEmpty())
                 return;
 
             QFile file(fileName);
             if (!file.open(QIODevice::WriteOnly)) {
-                MessageError("Failed to open file for writing");
+                MessageError(tr("Failed to open file for writing"));
                 return;
             }
 
@@ -558,8 +558,8 @@ void TargetsWidget::onCopyToClipboard() const
     if (!idx.isValid()) return;
 
     QInputDialog dialog;
-    dialog.setWindowTitle("Format for clipboard");
-    dialog.setLabelText("Format:");
+    dialog.setWindowTitle(tr("Format for clipboard"));
+    dialog.setLabelText(tr("Format:"));
     dialog.setTextValue("%computer%.%domain% - %address%");
     QLineEdit *lineEdit = dialog.findChild<QLineEdit*>();
     if (lineEdit)

@@ -440,9 +440,9 @@ SpinTable::SpinTable(int rows, int columns, QWidget* parent)
 {
     this->setParent(parent);
 
-    buttonAdd = new QPushButton("Add");
+    buttonAdd = new QPushButton(tr("Add"));
 
-    buttonClear = new QPushButton("Clear");
+    buttonClear = new QPushButton(tr("Clear"));
 
     tableModel = new QStandardItemModel(rows, columns, this);
 
@@ -527,32 +527,32 @@ TextEditConsole::TextEditConsole(QWidget* parent, int maxLines, bool noWrap, boo
 void TextEditConsole::createContextMenu(const QPoint &pos) {
     QMenu *menu = new QMenu(this);
     
-    QAction *copyAction = menu->addAction("Copy         (Ctrl + C)");
+    QAction *copyAction = menu->addAction(tr("Copy         (Ctrl + C)"));
     connect(copyAction, &QAction::triggered, this, [this]() { copy(); });
     
-    QAction *selectAllAction = menu->addAction("Select All   (Ctrl + A)");
+    QAction *selectAllAction = menu->addAction(tr("Select All   (Ctrl + A)"));
     connect(selectAllAction, &QAction::triggered, this, [this]() { selectAll(); });
 
-    QAction *findAction = menu->addAction("Find         (Ctrl + F)");
+    QAction *findAction = menu->addAction(tr("Find         (Ctrl + F)"));
     connect(findAction, &QAction::triggered, this, [this]() { Q_EMIT ctx_find(); });
     
-    QAction *clearAction = menu->addAction("Clear        (Ctrl + L)");
+    QAction *clearAction = menu->addAction(tr("Clear        (Ctrl + L)"));
     connect(clearAction, &QAction::triggered, this, [this]() { clear(); });
 
     menu->addSeparator();
 
-    QAction *showHistory = menu->addAction("Show history (Ctrl + H)");
+    QAction *showHistory = menu->addAction(tr("Show history (Ctrl + H)"));
     connect(showHistory, &QAction::triggered, this, [this]() { Q_EMIT ctx_history(); });
 
-    QAction *setBufferSizeAction = menu->addAction("Set buffer size...");
+    QAction *setBufferSizeAction = menu->addAction(tr("Set buffer size..."));
     connect(setBufferSizeAction, &QAction::triggered, this, [this]() {
         bool ok;
-        int newSize = QInputDialog::getInt(this, "Set buffer size", "Enter maximum number of lines:", maxLines, 100, 100000, 100, &ok);
+        int newSize = QInputDialog::getInt(this, tr("Set buffer size"), tr("Enter maximum number of lines:"), maxLines, 100, 100000, 100, &ok);
         if (ok)
             setBufferSize(newSize);
     });
     
-    QAction *noWrapAction = menu->addAction("No Wrap");
+    QAction *noWrapAction = menu->addAction(tr("No Wrap"));
     noWrapAction->setCheckable(true);
     noWrapAction->setChecked(noWrap);
     connect(noWrapAction, &QAction::toggled, this, [this](bool checked) {
@@ -563,12 +563,12 @@ void TextEditConsole::createContextMenu(const QPoint &pos) {
             setLineWrapMode(QPlainTextEdit::WidgetWidth);
     });
     
-    QAction *autoScrollAction = menu->addAction("Auto scroll");
+    QAction *autoScrollAction = menu->addAction(tr("Auto scroll"));
     autoScrollAction->setCheckable(true);
     autoScrollAction->setChecked(autoScroll);
     connect(autoScrollAction, &QAction::toggled, this, &TextEditConsole::setAutoScrollEnabled);
 
-    QAction *bgImageAction = menu->addAction("Show background image");
+    QAction *bgImageAction = menu->addAction(tr("Show background image"));
     bgImageAction->setCheckable(true);
     bgImageAction->setChecked(showBgImage);
     connect(bgImageAction, &QAction::toggled, this, [this](bool checked) {

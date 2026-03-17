@@ -7,9 +7,10 @@
 #include <Client/AuthProfile.h>
 #include <Client/AxScript/AxScriptManager.h>
 
-REGISTER_DOCK_WIDGET(BrowserProcessWidget, "Browser Process", false)
+REGISTER_DOCK_WIDGET(BrowserProcessWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Browser Process"), false)
 
-BrowserProcessWidget::BrowserProcessWidget(const AdaptixWidget* w, Agent* a) : DockTab(QString("Processes [%1]").arg(a->data.Id), w->GetProfile()->GetProject())
+BrowserProcessWidget::BrowserProcessWidget(const AdaptixWidget* w, Agent* a)
+    : DockTab(BrowserProcessWidget::tr("Processes [%1]").arg(a->data.Id), w->GetProfile()->GetProject())
 {
     agent = a;
     this->createUI();
@@ -36,16 +37,17 @@ void BrowserProcessWidget::createUI()
     buttonReload = new QPushButton(QIcon(":/icons/reload"), "", this);
     buttonReload->setIconSize( QSize( 24,24 ));
     buttonReload->setFixedSize(37, 28);
-    buttonReload->setToolTip("Reload");
+    buttonReload->setToolTip(tr("Reload"));
 
     inputFilter = new QLineEdit(this);
+    inputFilter->setPlaceholderText(tr("Filter"));
 
     line_1 = new QFrame(this);
     line_1->setFrameShape(QFrame::VLine);
     line_1->setMinimumHeight(25);
 
     statusLabel = new QLabel(this);
-    statusLabel->setText("Status: ");
+    statusLabel->setText(tr("Status: "));
 
     tableModel = new QStandardItemModel(this);
 
@@ -69,20 +71,20 @@ void BrowserProcessWidget::createUI()
 
     if (this->agent->data.Os == OS_WINDOWS) {
         tableModel->setColumnCount(6);
-        tableModel->setHorizontalHeaderItem(0, new QStandardItem("PID"));
-        tableModel->setHorizontalHeaderItem(1, new QStandardItem("PPID"));
-        tableModel->setHorizontalHeaderItem(2, new QStandardItem("Arch"));
-        tableModel->setHorizontalHeaderItem(3, new QStandardItem("Session"));
-        tableModel->setHorizontalHeaderItem(4, new QStandardItem("Context"));
-        tableModel->setHorizontalHeaderItem(5, new QStandardItem("Process"));
+        tableModel->setHorizontalHeaderItem(0, new QStandardItem(tr("PID")));
+        tableModel->setHorizontalHeaderItem(1, new QStandardItem(tr("PPID")));
+        tableModel->setHorizontalHeaderItem(2, new QStandardItem(tr("Arch")));
+        tableModel->setHorizontalHeaderItem(3, new QStandardItem(tr("Session")));
+        tableModel->setHorizontalHeaderItem(4, new QStandardItem(tr("Context")));
+        tableModel->setHorizontalHeaderItem(5, new QStandardItem(tr("Process")));
     }
     else {
         tableModel->setColumnCount(5);
-        tableModel->setHorizontalHeaderItem(0, new QStandardItem("PID"));
-        tableModel->setHorizontalHeaderItem(1, new QStandardItem("PPID"));
-        tableModel->setHorizontalHeaderItem(2, new QStandardItem("TTY"));
-        tableModel->setHorizontalHeaderItem(3, new QStandardItem("Context"));
-        tableModel->setHorizontalHeaderItem(4, new QStandardItem("Process"));
+        tableModel->setHorizontalHeaderItem(0, new QStandardItem(tr("PID")));
+        tableModel->setHorizontalHeaderItem(1, new QStandardItem(tr("PPID")));
+        tableModel->setHorizontalHeaderItem(2, new QStandardItem(tr("TTY")));
+        tableModel->setHorizontalHeaderItem(3, new QStandardItem(tr("Context")));
+        tableModel->setHorizontalHeaderItem(4, new QStandardItem(tr("Process")));
     }
 
     listGridLayout = new QGridLayout(this);
@@ -101,7 +103,7 @@ void BrowserProcessWidget::createUI()
 
     treeBrowserWidget = new QTreeWidget();
     treeBrowserWidget->setSortingEnabled(false);
-    treeBrowserWidget->headerItem()->setText( 0, "Process Tree" );
+    treeBrowserWidget->headerItem()->setText( 0, tr("Process Tree") );
     treeBrowserWidget->setIconSize(QSize(25, 25));
 
     splitter = new QSplitter( this );
@@ -299,7 +301,7 @@ void BrowserProcessWidget::setTreeProcessDataWin(QMap<int, BrowserProcessDataWin
     treeBrowserWidget->clear();
 
     treeBrowserWidget->setColumnCount(3);
-    treeBrowserWidget->setHeaderLabels({"Process", "Process ID", "Context"});
+    treeBrowserWidget->setHeaderLabels({tr("Process"), tr("Process ID"), tr("Context")});
 
     QMap<int, QTreeWidgetItem*> nodeMap;
 
@@ -351,7 +353,7 @@ void BrowserProcessWidget::setTreeProcessDataUnix(QMap<int, BrowserProcessDataUn
     treeBrowserWidget->clear();
 
     treeBrowserWidget->setColumnCount(3);
-    treeBrowserWidget->setHeaderLabels({"Process", "Process ID", "Context"});
+    treeBrowserWidget->setHeaderLabels({tr("Process"), tr("Process ID"), tr("Context")});
 
     QMap<int, QTreeWidgetItem*> nodeMap;
 
@@ -482,7 +484,7 @@ void BrowserProcessWidget::handleTableMenu(const QPoint &pos)
     if (count) {
         ctxMenu.addSeparator();
     }
-    ctxMenu.addAction( "Copy PID", this, &BrowserProcessWidget::actionCopyPid);
+    ctxMenu.addAction(tr("Copy PID"), this, &BrowserProcessWidget::actionCopyPid);
 
     ctxMenu.exec(tableView->horizontalHeader()->viewport()->mapToGlobal(pos));
 }

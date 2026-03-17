@@ -30,6 +30,7 @@ enum TasksColumns {
 
 class TaskOutputWidget : public QWidget
 {
+    Q_DECLARE_TR_FUNCTIONS(TaskOutputWidget)
     QGridLayout* mainGridLayout = nullptr;
     QLabel*      label          = nullptr;
     QLineEdit*   inputMessage   = nullptr;
@@ -139,17 +140,17 @@ protected:
         if (!model)
             return true;
 
-        QString agent  = model->index(row, TC_AgentId, parent).data().toString();
-        QString type   = model->index(row, TC_TaskType, parent).data().toString();
-        QString status = model->index(row, TC_Result, parent).data().toString();
+        QString agent  = model->index(row, TC_AgentId, parent).data(Qt::DisplayRole).toString();
+        QString type   = model->index(row, TC_TaskType, parent).data(Qt::UserRole).toString();
+        QString status = model->index(row, TC_Result, parent).data(Qt::UserRole).toString();
 
-        if (!agentFilter.isEmpty() && agentFilter != "All agents" && agent != agentFilter)
+        if (!agentFilter.isEmpty() && agent != agentFilter)
             return false;
 
-        if (!typeFilter.isEmpty() && typeFilter != "All types" && type != typeFilter)
+        if (!typeFilter.isEmpty() && type != typeFilter)
             return false;
 
-        if (!statusFilter.isEmpty() && statusFilter != "Any status" && status != statusFilter)
+        if (!statusFilter.isEmpty() && status != statusFilter)
             return false;
 
         if (!textFilter.isEmpty()) {
@@ -172,9 +173,42 @@ protected:
 class TasksTableModel : public QAbstractTableModel
 {
 Q_OBJECT
+private:
     QVector<TaskData>     tasks;
     QHash<QString, int>   idToRow;
 
+public:
+    static QString taskTypeKey(int taskType) {
+        return taskType == 1 ? "TASK" :
+               taskType == 3 ? "JOB" :
+               taskType == 4 ? "TUNNEL" : "unknown";
+    }
+
+    static QString taskTypeDisplay(const QString& key) {
+        if (key == "TASK")
+            return tr("TASK");
+        if (key == "JOB")
+            return tr("JOB");
+        if (key == "TUNNEL")
+            return tr("TUNNEL");
+        return tr("unknown");
+    }
+
+    static QString statusDisplay(const QString& status) {
+        if (status == "Hosted")
+            return tr("Hosted");
+        if (status == "Running")
+            return tr("Running");
+        if (status == "Success")
+            return tr("Success");
+        if (status == "Error")
+            return tr("Error");
+        if (status == "Canceled")
+            return tr("Canceled");
+        return status;
+    }
+
+private:
     void rebuildIndex() {
         idToRow.clear();
         for (int i = 0; i < tasks.size(); ++i)
@@ -199,9 +233,7 @@ public:
         if (role == Qt::DisplayRole) {
             switch (index.column()) {
                 case TC_TaskId:      return t.TaskId;
-                case TC_TaskType:    return t.TaskType == 1 ? "TASK" :
-                                     t.TaskType == 3 ? "JOB" :
-                                     t.TaskType == 4 ? "TUNNEL" : "unknown";
+                case TC_TaskType:    return taskTypeDisplay(taskTypeKey(t.TaskType));
                 case TC_AgentId:     return t.AgentId;
                 case TC_Client:      return t.Client;
                 case TC_User:        return t.User;
@@ -209,7 +241,7 @@ public:
                 case TC_StartTime:   return UnixTimestampGlobalToStringLocal(t.StartTime);
                 case TC_FinishTime:  return UnixTimestampGlobalToStringLocal(t.FinishTime);
                 case TC_CommandLine: return t.CommandLine;
-                case TC_Result:      return t.Status;
+                case TC_Result:      return statusDisplay(t.Status);
                 case TC_Output:      return t.Message;
                 default: ;
             }
@@ -219,6 +251,8 @@ public:
             switch (index.column()) {
                 case TC_StartTime:   return t.StartTime;
                 case TC_FinishTime:  return t.FinishTime;
+                case TC_TaskType:    return taskTypeKey(t.TaskType);
+                case TC_Result:      return t.Status;
                 default:             return data(index, Qt::DisplayRole);
             }
         }
@@ -252,12 +286,20 @@ public:
         if (role != Qt::DisplayRole || o != Qt::Horizontal)
             return {};
 
-        static QStringList headers = {
-            "Task ID","Type","Agent ID","Client","User",
-            "Computer","Start Time","Finish Time","Command Line","Status","Message"
-        };
-
-        return headers.value(section);
+        switch (section) {
+            case TC_TaskId:      return tr("Task ID");
+            case TC_TaskType:    return tr("Type");
+            case TC_AgentId:     return tr("Agent ID");
+            case TC_Client:      return tr("Client");
+            case TC_User:        return tr("User");
+            case TC_Computer:    return tr("Computer");
+            case TC_StartTime:   return tr("Start Time");
+            case TC_FinishTime:  return tr("Finish Time");
+            case TC_CommandLine: return tr("Command Line");
+            case TC_Result:      return tr("Status");
+            case TC_Output:      return tr("Message");
+            default:             return {};
+        }
     }
 
     void add(const TaskData& task) {

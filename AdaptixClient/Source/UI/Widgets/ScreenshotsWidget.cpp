@@ -6,7 +6,7 @@
 #include <Utils/CustomElements.h>
 #include <Utils/NonBlockingDialogs.h>
 
-REGISTER_DOCK_WIDGET(ScreenshotsWidget, "Screenshots", true)
+REGISTER_DOCK_WIDGET(ScreenshotsWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Screenshots"), true)
 
 ImageFrame::ImageFrame(QWidget* parent) : QWidget(parent), label(new QLabel), scrollArea(new QScrollArea(this)), ctrlPressed(false), scaleFactor(1.0)
 {
@@ -92,7 +92,7 @@ void ImageFrame::clear()
 
 
 
-ScreenshotsWidget::ScreenshotsWidget(AdaptixWidget* w) : DockTab("Screenshots", w->GetProfile()->GetProject(), ":/icons/picture"), adaptixWidget(w)
+ScreenshotsWidget::ScreenshotsWidget(AdaptixWidget* w) : DockTab(tr("Screenshots"), w->GetProfile()->GetProject(), ":/icons/picture"), adaptixWidget(w)
 {
     this->createUI();
 
@@ -172,12 +172,12 @@ void ScreenshotsWidget::createUI()
     searchWidget->setMaximumHeight(30);
 
     inputFilter = new QLineEdit(searchWidget);
-    inputFilter->setPlaceholderText("filter: (admin | root) & ^(test)");
+    inputFilter->setPlaceholderText(tr("filter: (admin | root) & ^(test)"));
     inputFilter->setMaximumWidth(300);
 
-    autoSearchCheck = new QCheckBox("auto", searchWidget);
+    autoSearchCheck = new QCheckBox(tr("auto"), searchWidget);
     autoSearchCheck->setChecked(true);
-    autoSearchCheck->setToolTip("Auto search on text change. If unchecked, press Enter to search.");
+    autoSearchCheck->setToolTip(tr("Auto search on text change. If unchecked, press Enter to search."));
 
     hideButton = new ClickableLabel("  x  ");
     hideButton->setCursor(Qt::PointingHandCursor);
@@ -351,9 +351,9 @@ void ScreenshotsWidget::handleScreenshotsMenu(const QPoint &pos)
         return;
 
     auto ctxMenu = QMenu();
-    ctxMenu.addAction("Set note", this, &ScreenshotsWidget::actionNote);
-    ctxMenu.addAction("Download", this, &ScreenshotsWidget::actionDownload);
-    ctxMenu.addAction("Delete",   this, &ScreenshotsWidget::actionDelete);
+    ctxMenu.addAction(tr("Set note"), this, &ScreenshotsWidget::actionNote);
+    ctxMenu.addAction(tr("Download"), this, &ScreenshotsWidget::actionDownload);
+    ctxMenu.addAction(tr("Delete"),   this, &ScreenshotsWidget::actionDelete);
 
     ctxMenu.exec(tableView->viewport()->mapToGlobal(pos));
 }
@@ -372,11 +372,11 @@ void ScreenshotsWidget::actionNote()
     }
 
     bool inputOk;
-    QString newNote = QInputDialog::getText(nullptr, "Set note", "New note", QLineEdit::Normal, note, &inputOk);
+    QString newNote = QInputDialog::getText(nullptr, tr("Set note"), tr("New note"), QLineEdit::Normal, note, &inputOk);
     if (inputOk) {
         HttpReqScreenSetNoteAsync(listId, newNote, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
             if (!success)
-                MessageError(message.isEmpty() ? "Response timeout" : message);
+                MessageError(message.isEmpty() ? ScreenshotsWidget::tr("Response timeout") : message);
         });
     }
 }
@@ -393,14 +393,14 @@ void ScreenshotsWidget::actionDownload()
     if (adaptixWidget && adaptixWidget->GetProfile())
         baseDir = QDir(adaptixWidget->GetProfile()->GetProjectDir()).filePath(QStringLiteral("screenshot.png"));
 
-    NonBlockingDialogs::getSaveFileName(this, "Save File", baseDir, "All Files (*.*)",
+    NonBlockingDialogs::getSaveFileName(this, tr("Save File"), baseDir, tr("All Files (*.*)"),
         [this, screenData](const QString& filePath) {
             if (filePath.isEmpty())
                 return;
 
             QFile file(filePath);
             if (!file.open(QIODevice::WriteOnly)) {
-                MessageError("Failed to open file for writing");
+                MessageError(tr("Failed to open file for writing"));
                 return;
             }
 
@@ -408,8 +408,8 @@ void ScreenshotsWidget::actionDownload()
             file.close();
 
             QInputDialog inputDialog;
-            inputDialog.setWindowTitle("Sync file");
-            inputDialog.setLabelText("File saved to:");
+            inputDialog.setWindowTitle(tr("Sync file"));
+            inputDialog.setLabelText(tr("File saved to:"));
             inputDialog.setTextEchoMode(QLineEdit::Normal);
             inputDialog.setTextValue(filePath);
             inputDialog.adjustSize();
@@ -426,7 +426,7 @@ void ScreenshotsWidget::actionDelete()
 
     HttpReqScreenRemoveAsync(listId, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Response timeout" : message);
+            MessageError(message.isEmpty() ? ScreenshotsWidget::tr("Response timeout") : message);
     });
 }
 

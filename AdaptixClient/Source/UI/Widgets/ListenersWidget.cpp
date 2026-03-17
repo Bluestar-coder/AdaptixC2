@@ -8,9 +8,9 @@
 #include <Client/AxScript/AxElementWrappers.h>
 #include <Client/AxScript/AxScriptManager.h>
 
-REGISTER_DOCK_WIDGET(ListenersWidget, "Listeners", true)
+REGISTER_DOCK_WIDGET(ListenersWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Listeners"), true)
 
-ListenersWidget::ListenersWidget(AdaptixWidget* w) : DockTab("Listeners", w->GetProfile()->GetProject(), ":/icons/listeners"), adaptixWidget(w)
+ListenersWidget::ListenersWidget(AdaptixWidget* w) : DockTab(tr("Listeners"), w->GetProfile()->GetProject(), ":/icons/listeners"), adaptixWidget(w)
 {
     this->createUI();
 
@@ -37,7 +37,7 @@ ListenersWidget::ListenersWidget(AdaptixWidget* w) : DockTab("Listeners", w->Get
     this->dockWidget->setWidget(this);
 }
 
-ListenersWidget::~ListenersWidget() = default;
+    ListenersWidget::~ListenersWidget() = default;
 
 void ListenersWidget::SetUpdatesEnabled(const bool enabled)
 {
@@ -57,12 +57,12 @@ void ListenersWidget::createUI()
     searchWidget->setVisible(false);
 
     inputFilter = new QLineEdit(searchWidget);
-    inputFilter->setPlaceholderText("filter: (http | https) & ^(test)");
+    inputFilter->setPlaceholderText(tr("filter: (http | https) & ^(test)"));
     inputFilter->setMaximumWidth(300);
 
-    autoSearchCheck = new QCheckBox("auto", searchWidget);
+    autoSearchCheck = new QCheckBox(tr("auto"), searchWidget);
     autoSearchCheck->setChecked(true);
-    autoSearchCheck->setToolTip("Auto search on text change. If unchecked, press Enter to search.");
+    autoSearchCheck->setToolTip(tr("Auto search on text change. If unchecked, press Enter to search."));
 
     hideButton = new ClickableLabel("  x  ");
     hideButton->setCursor(Qt::PointingHandCursor);
@@ -185,14 +185,14 @@ void ListenersWidget::handleListenersMenu(const QPoint &pos) const
 {
     QMenu listenerMenu = QMenu();
 
-    listenerMenu.addAction("Create", this, &ListenersWidget::onCreateListener);
-    listenerMenu.addAction("Edit",   this, &ListenersWidget::onEditListener);
-    listenerMenu.addAction("Remove", this, &ListenersWidget::onRemoveListener);
+    listenerMenu.addAction(tr("Create"), this, &ListenersWidget::onCreateListener);
+    listenerMenu.addAction(tr("Edit"),   this, &ListenersWidget::onEditListener);
+    listenerMenu.addAction(tr("Remove"), this, &ListenersWidget::onRemoveListener);
     listenerMenu.addSeparator();
-    listenerMenu.addAction("Pause",  this, &ListenersWidget::onPauseListener);
-    listenerMenu.addAction("Resume", this, &ListenersWidget::onResumeListener);
+    listenerMenu.addAction(tr("Pause"),  this, &ListenersWidget::onPauseListener);
+    listenerMenu.addAction(tr("Resume"), this, &ListenersWidget::onResumeListener);
     listenerMenu.addSeparator();
-    listenerMenu.addAction("Generate agent", this, &ListenersWidget::onGenerateAgent);
+    listenerMenu.addAction(tr("Generate agent"), this, &ListenersWidget::onGenerateAgent);
 
     QPoint globalPos = tableView->mapToGlobal(pos);
     listenerMenu.exec(globalPos);
@@ -208,13 +208,13 @@ void ListenersWidget::onCreateListener() const
     for (auto listener : listenersList) {
         auto engine = adaptixWidget->ScriptManager->ListenerScriptEngine(listener);
         if (engine == nullptr) {
-            adaptixWidget->ScriptManager->consolePrintError(QString("Listener %1 is not registered").arg(listener));
+            adaptixWidget->ScriptManager->consolePrintError(tr("Listener %1 is not registered").arg(listener));
             continue;
         }
 
         QJSValue func = engine->globalObject().property("ListenerUI");
         if (!func.isCallable()) {
-            adaptixWidget->ScriptManager->consolePrintError(listener + " - function ListenerUI is not registered");
+            adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function ListenerUI is not registered").arg(listener));
             continue;
         }
 
@@ -228,7 +228,7 @@ void ListenersWidget::onCreateListener() const
         }
 
         if (!result.isObject()) {
-            adaptixWidget->ScriptManager->consolePrintError(listener + " - function ListenerUI must return panel and container objects");
+            adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function ListenerUI must return panel and container objects").arg(listener));
             continue;
         }
 
@@ -238,21 +238,21 @@ void ListenersWidget::onCreateListener() const
         QJSValue ui_width     = result.property("ui_width");
 
         if ( ui_container.isUndefined() || !ui_container.isObject() || ui_panel.isUndefined() || !ui_panel.isQObject()) {
-            adaptixWidget->ScriptManager->consolePrintError(listener + " - function ListenerUI must return panel and container objects");
+            adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function ListenerUI must return panel and container objects").arg(listener));
             continue;
         }
 
         QObject* objPanel = ui_panel.toQObject();
         auto* formElement = dynamic_cast<AxPanelWrapper*>(objPanel);
         if (!formElement) {
-            adaptixWidget->ScriptManager->consolePrintError(listener + " - function ListenerUI must return panel and container objects");
+            adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function ListenerUI must return panel and container objects").arg(listener));
             continue;
         }
 
         QObject* objContainer = ui_container.toQObject();
         auto* container = dynamic_cast<AxContainerWrapper*>(objContainer);
         if (!container) {
-            adaptixWidget->ScriptManager->consolePrintError(listener + " - function ListenerUI must return panel and container objects");
+            adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function ListenerUI must return panel and container objects").arg(listener));
             continue;
         }
 
@@ -305,13 +305,13 @@ void ListenersWidget::onEditListener() const
 
     auto engine = adaptixWidget->ScriptManager->ListenerScriptEngine(listenerRegName);
     if (engine == nullptr) {
-        adaptixWidget->ScriptManager->consolePrintError(QString("Listener %1 is not registered").arg(listenerName));
+        adaptixWidget->ScriptManager->consolePrintError(tr("Listener %1 is not registered").arg(listenerName));
         return;;
     }
 
     QJSValue func = engine->globalObject().property("ListenerUI");
     if (!func.isCallable()) {
-        adaptixWidget->ScriptManager->consolePrintError(listenerName + " - function ListenerUI is not registered");
+        adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function ListenerUI is not registered").arg(listenerName));
         return;
     }
 
@@ -325,7 +325,7 @@ void ListenersWidget::onEditListener() const
     }
 
     if (!result.isObject()) {
-        adaptixWidget->ScriptManager->consolePrintError(listenerName + " - function ListenerUI must return panel and container objects");
+        adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function ListenerUI must return panel and container objects").arg(listenerName));
         return;
     }
 
@@ -335,21 +335,21 @@ void ListenersWidget::onEditListener() const
     QJSValue ui_width     = result.property("ui_width");
 
     if ( ui_container.isUndefined() || !ui_container.isObject() || ui_panel.isUndefined() || !ui_panel.isQObject()) {
-        adaptixWidget->ScriptManager->consolePrintError(listenerName + " - function ListenerUI must return panel and container objects");
+        adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function ListenerUI must return panel and container objects").arg(listenerName));
         return;
     }
 
     QObject* objPanel = ui_panel.toQObject();
     auto* formElement = dynamic_cast<AxPanelWrapper*>(objPanel);
     if (!formElement) {
-        adaptixWidget->ScriptManager->consolePrintError(listenerName + " - function ListenerUI must return panel and container objects");
+        adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function ListenerUI must return panel and container objects").arg(listenerName));
         return;
     }
 
     QObject* objContainer = ui_container.toQObject();
     auto* container = dynamic_cast<AxContainerWrapper*>(objContainer);
     if (!container) {
-        adaptixWidget->ScriptManager->consolePrintError(listenerName + " - function ListenerUI must return panel and container objects");
+        adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function ListenerUI must return panel and container objects").arg(listenerName));
         return;
     }
 
@@ -389,8 +389,8 @@ void ListenersWidget::onRemoveListener() const
     auto listenerName    = listenersModel->data(listenersModel->index(sourceIndex.row(), LC_Name), Qt::DisplayRole).toString();
     auto listenerRegName = listenersModel->data(listenersModel->index(sourceIndex.row(), LC_RegName), Qt::DisplayRole).toString();
 
-    QMessageBox::StandardButton reply = QMessageBox::question(nullptr, "Delete Confirmation",
-                                      QString("Are you sure you want to remove the '%1' listener?").arg(listenerName),
+    QMessageBox::StandardButton reply = QMessageBox::question(nullptr, tr("Delete Confirmation"),
+                                      tr("Are you sure you want to remove the '%1' listener?").arg(listenerName),
                                       QMessageBox::Yes | QMessageBox::No,
                                       QMessageBox::No);
     if (reply != QMessageBox::Yes)
@@ -398,7 +398,7 @@ void ListenersWidget::onRemoveListener() const
 
     HttpReqListenerStopAsync(listenerName, listenerRegName, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Response timeout" : message);
+            MessageError(message.isEmpty() ? ListenersWidget::tr("Response timeout") : message);
     });
 }
 
@@ -417,7 +417,7 @@ void ListenersWidget::onPauseListener() const
 
     HttpReqListenerPauseAsync(listenerName, listenerRegName, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Response timeout" : message);
+            MessageError(message.isEmpty() ? ListenersWidget::tr("Response timeout") : message);
     });
 }
 
@@ -436,7 +436,7 @@ void ListenersWidget::onResumeListener() const
 
     HttpReqListenerResumeAsync(listenerName, listenerRegName, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Response timeout" : message);
+            MessageError(message.isEmpty() ? ListenersWidget::tr("Response timeout") : message);
     });
 }
 
@@ -461,13 +461,13 @@ void ListenersWidget::onGenerateAgent() const
     for (auto agent : agentNames) {
         auto engine = adaptixWidget->ScriptManager->AgentScriptEngine(agent);
         if (engine == nullptr) {
-            adaptixWidget->ScriptManager->consolePrintError(QString("Listener %1 is not registered").arg(agent));
+            adaptixWidget->ScriptManager->consolePrintError(tr("Listener %1 is not registered").arg(agent));
             return;;
         }
 
         QJSValue func = engine->globalObject().property("GenerateUI");
         if (!func.isCallable()) {
-            adaptixWidget->ScriptManager->consolePrintError(listenerName + " - function GenerateUI is not registered");
+            adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function GenerateUI is not registered").arg(listenerName));
             return;
         }
 
@@ -484,7 +484,7 @@ void ListenersWidget::onGenerateAgent() const
         }
 
         if (!result.isObject()) {
-            adaptixWidget->ScriptManager->consolePrintError(listenerName + " - function GenerateUI must return panel and container objects");
+            adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function GenerateUI must return panel and container objects").arg(listenerName));
             return;
         }
 
@@ -494,21 +494,21 @@ void ListenersWidget::onGenerateAgent() const
         QJSValue ui_width     = result.property("ui_width");
 
         if ( ui_container.isUndefined() || !ui_container.isObject() || ui_panel.isUndefined() || !ui_panel.isQObject()) {
-            adaptixWidget->ScriptManager->consolePrintError(listenerName + " - function GenerateUI must return panel and container objects");
+            adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function GenerateUI must return panel and container objects").arg(listenerName));
             return;
         }
 
         QObject* objPanel = ui_panel.toQObject();
         auto* formElement = dynamic_cast<AxPanelWrapper*>(objPanel);
         if (!formElement) {
-            adaptixWidget->ScriptManager->consolePrintError(listenerName + " - function GenerateUI must return panel and container objects");
+            adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function GenerateUI must return panel and container objects").arg(listenerName));
             return;
         }
 
         QObject* objContainer = ui_container.toQObject();
         auto* container = dynamic_cast<AxContainerWrapper*>(objContainer);
         if (!container) {
-            adaptixWidget->ScriptManager->consolePrintError(listenerName + " - function GenerateUI must return panel and container objects");
+            adaptixWidget->ScriptManager->consolePrintError(tr("%1 - function GenerateUI must return panel and container objects").arg(listenerName));
             return;
         }
 

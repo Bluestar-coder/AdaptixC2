@@ -5,9 +5,9 @@
 #include <Client/AuthProfile.h>
 #include <Client/Requestor.h>
 
-REGISTER_DOCK_WIDGET(ChatWidget, "Chat", true)
+REGISTER_DOCK_WIDGET(ChatWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Chat"), true)
 
-ChatWidget::ChatWidget(AdaptixWidget* w) : DockTab("Chat", w->GetProfile()->GetProject(), ":/icons/chat"), adaptixWidget(w)
+ChatWidget::ChatWidget(AdaptixWidget* w) : DockTab(tr("Chat"), w->GetProfile()->GetProject(), ":/icons/chat"), adaptixWidget(w)
 {
     this->createUI();
 
@@ -51,9 +51,9 @@ void ChatWidget::createUI()
     nextButton = new ClickableLabel(">");
     nextButton->setCursor( Qt::PointingHandCursor );
 
-    searchLabel    = new QLabel("0 of 0");
+    searchLabel    = new QLabel(tr("0 of 0"));
     searchLineEdit = new QLineEdit();
-    searchLineEdit->setPlaceholderText("Find");
+    searchLineEdit->setPlaceholderText(tr("Find"));
     searchLineEdit->setMaximumWidth(300);
 
     hideButton = new ClickableLabel("X");
@@ -98,7 +98,7 @@ void ChatWidget::handleChat()
 
     HttpReqChatSendMessageAsync(text, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Response timeout" : message);
+            MessageError(message.isEmpty() ? ChatWidget::tr("Response timeout") : message);
     });
 }
 
@@ -146,7 +146,7 @@ void ChatWidget::findAndHighlightAll(const QString &pattern)
 void ChatWidget::highlightCurrent() const
 {
     if (allSelections.isEmpty()) {
-        searchLabel->setText("0 of 0");
+        searchLabel->setText(tr("0 of 0"));
         return;
     }
 
@@ -161,7 +161,7 @@ void ChatWidget::highlightCurrent() const
     chatTextEdit->setExtraSelections(sels);
     chatTextEdit->setTextCursor(sels[currentIndex].cursor);
 
-    searchLabel->setText(QString("%1 of %2").arg(currentIndex + 1).arg(sels.size()));
+    searchLabel->setText(tr("%1 of %2").arg(currentIndex + 1).arg(sels.size()));
 }
 
 void ChatWidget::Clear() const { chatTextEdit->clear(); }
@@ -186,7 +186,7 @@ void ChatWidget::handleSearch()
     if ( pattern.isEmpty() && allSelections.size() ) {
         allSelections.clear();
         currentIndex = -1;
-        searchLabel->setText("0 of 0");
+        searchLabel->setText(tr("0 of 0"));
         chatTextEdit->setExtraSelections({});
         return;
     }
@@ -208,7 +208,7 @@ void ChatWidget::handleSearchBackward()
     if (pattern.isEmpty() && allSelections.size()) {
         allSelections.clear();
         currentIndex = -1;
-        searchLabel->setText("0 of 0");
+        searchLabel->setText(tr("0 of 0"));
         chatTextEdit->setExtraSelections({});
         return;
     }

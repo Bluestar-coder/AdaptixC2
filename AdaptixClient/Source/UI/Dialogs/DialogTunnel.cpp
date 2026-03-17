@@ -1,6 +1,17 @@
 #include <UI/Dialogs/DialogTunnel.h>
 #include <Client/Requestor.h>
 
+namespace {
+
+constexpr auto kTunnelSocks5 = "socks5";
+constexpr auto kTunnelSocks4 = "socks4";
+constexpr auto kTunnelLpf = "lportfwd";
+constexpr auto kTunnelRpf = "rportfwd";
+constexpr auto kEndpointTeamserver = "Teamserver";
+constexpr auto kEndpointClient = "Client";
+
+}
+
 DialogTunnel::DialogTunnel(const QString &agentId, const bool s4, const bool s5, const bool lpf, const bool rpf)
 {
     this->createUI();
@@ -8,10 +19,10 @@ DialogTunnel::DialogTunnel(const QString &agentId, const bool s4, const bool s5,
     tunnelTypeCombo->clear();
     this->AgentId = agentId;
 
-    if (s5)  tunnelTypeCombo->addItem("Socks5");
-    if (s4)  tunnelTypeCombo->addItem("Socks4");
-    if (lpf) tunnelTypeCombo->addItem("Local port forwarding");
-    if (rpf) tunnelTypeCombo->addItem("Reverse port forwarding");
+    if (s5)  tunnelTypeCombo->addItem(tr("Socks5"), kTunnelSocks5);
+    if (s4)  tunnelTypeCombo->addItem(tr("Socks4"), kTunnelSocks4);
+    if (lpf) tunnelTypeCombo->addItem(tr("Local port forwarding"), kTunnelLpf);
+    if (rpf) tunnelTypeCombo->addItem(tr("Reverse port forwarding"), kTunnelRpf);
 
     connect(tunnelTypeCombo, &QComboBox::currentTextChanged, this, &DialogTunnel::changeType);
     connect(buttonCreate,    &QPushButton::clicked,          this, &DialogTunnel::onButtonCreate);
@@ -29,18 +40,18 @@ DialogTunnel::~DialogTunnel() = default;
 void DialogTunnel::createUI()
 {
     this->resize(400, 350);
-    this->setWindowTitle( "Create Tunnel" );
+    this->setWindowTitle(tr("Create Tunnel"));
     this->setProperty("Main", "base");
 
-    tunnelTypeLabel = new QLabel("Tunnel type:", this);
+    tunnelTypeLabel = new QLabel(tr("Tunnel type:"), this);
     tunnelTypeCombo = new QComboBox(this);
 
-    tunnelEndpointLabel = new QLabel("Tunnel endpoint:", this);
+    tunnelEndpointLabel = new QLabel(tr("Tunnel endpoint:"), this);
     tunnelEndpointCombo = new QComboBox(this);
-    tunnelEndpointCombo->addItem("Teamserver");
-    tunnelEndpointCombo->addItem("Client");
+    tunnelEndpointCombo->addItem(tr("Teamserver"), kEndpointTeamserver);
+    tunnelEndpointCombo->addItem(tr("Client"), kEndpointClient);
 
-    tunnelDescLabel = new QLabel("Description: ",this);
+    tunnelDescLabel = new QLabel(tr("Description:"),this);
     tunnelDescInput = new QLineEdit(this);
 
     tunnelStackWidget = new QStackedWidget(this );
@@ -51,15 +62,15 @@ void DialogTunnel::createUI()
     stackGridLayout->addWidget(tunnelStackWidget, 0, 0, 1, 1 );
 
     tunnelConfigGroupbox = new QGroupBox(this);
-    tunnelConfigGroupbox->setTitle("Settings");
+    tunnelConfigGroupbox->setTitle(tr("Settings"));
     tunnelConfigGroupbox->setLayout(stackGridLayout);
 
     buttonCreate = new QPushButton(this);
-    buttonCreate->setText("Create");
+    buttonCreate->setText(tr("Create"));
     buttonCreate->setDefault(true);
 
     buttonCancel = new QPushButton(this);
-    buttonCancel->setText("Cancel");
+    buttonCancel->setText(tr("Cancel"));
 
     horizontalSpacer_1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
     horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -91,17 +102,17 @@ void DialogTunnel::createUI()
     buttonCancel->setFixedHeight(buttonHeight);
 
     socks5Widget = new QWidget(this);
-    socks5LocalAddrLabel = new QLabel("Listen:", socks5Widget);
+    socks5LocalAddrLabel = new QLabel(tr("Listen:"), socks5Widget);
     socks5LocalAddrInput = new QLineEdit("0.0.0.0", socks5Widget);
     socks5LocalPortSpin  = new QSpinBox(socks5Widget);
     socks5LocalPortSpin->setMinimum(1);
     socks5LocalPortSpin->setMaximum(65535);
     socks5LocalPortSpin->setValue(1080);
-    socks5UseAuth       = new QCheckBox("Use authentication", socks5Widget);
-    socks5AuthUserLabel = new QLabel("Username:", socks5Widget);
+    socks5UseAuth       = new QCheckBox(tr("Use authentication"), socks5Widget);
+    socks5AuthUserLabel = new QLabel(tr("Username:"), socks5Widget);
     socks5AuthUserInput = new QLineEdit(socks5Widget);
     socks5AuthUserInput->setEnabled(false);
-    socks5AuthPassLabel = new QLabel("Password:", socks5Widget);
+    socks5AuthPassLabel = new QLabel(tr("Password:"), socks5Widget);
     socks5AuthPassInput = new QLineEdit(socks5Widget);
     socks5AuthPassInput->setEnabled(false);
 
@@ -118,7 +129,7 @@ void DialogTunnel::createUI()
 
 
     socks4Widget = new QWidget(this);
-    socks4LocalAddrLabel = new QLabel("Listen:", socks4Widget);
+    socks4LocalAddrLabel = new QLabel(tr("Listen:"), socks4Widget);
     socks4LocalAddrInput = new QLineEdit("0.0.0.0", socks4Widget);
     socks4LocalPortSpin  = new QSpinBox(socks4Widget);
     socks4LocalPortSpin->setMinimum(1);
@@ -133,13 +144,13 @@ void DialogTunnel::createUI()
 
 
     lpfWidget = new QWidget(this);
-    lpfLocalAddrLabel = new QLabel("Listen:", lpfWidget);
+    lpfLocalAddrLabel = new QLabel(tr("Listen:"), lpfWidget);
     lpfLocalAddrInput = new QLineEdit("0.0.0.0", lpfWidget);
     lpfLocalPortSpin  = new QSpinBox(lpfWidget);
     lpfLocalPortSpin->setMinimum(1);
     lpfLocalPortSpin->setMaximum(65535);
     lpfLocalPortSpin->setValue(8000);
-    lpfTargetAddrLabel = new QLabel("Target:", lpfWidget);
+    lpfTargetAddrLabel = new QLabel(tr("Target:"), lpfWidget);
     lpfTargetAddrInput = new QLineEdit("127.0.0.1", lpfWidget);
     lpfTargetPortSpin  = new QSpinBox(lpfWidget);
     lpfTargetPortSpin->setMinimum(1);
@@ -156,12 +167,12 @@ void DialogTunnel::createUI()
     tunnelStackWidget->addWidget(lpfWidget);
 
     rpfWidget = new QWidget(this);
-    rpfPortLabel = new QLabel("Port:", rpfWidget);
+    rpfPortLabel = new QLabel(tr("Port:"), rpfWidget);
     rpfPortSpin  = new QSpinBox(rpfWidget);
     rpfPortSpin->setMinimum(1);
     rpfPortSpin->setMaximum(65535);
     rpfPortSpin->setValue(8000);
-    rpfTargetAddrLabel = new QLabel("Target:", rpfWidget);
+    rpfTargetAddrLabel = new QLabel(tr("Target:"), rpfWidget);
     rpfTargetAddrInput = new QLineEdit("127.0.0.1", rpfWidget);
     rpfTargetPortSpin  = new QSpinBox(rpfWidget);
     rpfTargetPortSpin->setMinimum(1);
@@ -190,27 +201,29 @@ QString DialogTunnel::GetMessage() const { return this->message; }
 
 QString DialogTunnel::GetTunnelType() const { return this->tunnelType; }
 
-QString DialogTunnel::GetEndpoint() const { return this->tunnelEndpointCombo->currentText(); }
+QString DialogTunnel::GetEndpoint() const { return this->tunnelEndpointCombo->currentData().toString(); }
 
 QByteArray DialogTunnel::GetTunnelData() const { return this->jsonData; }
 
 void DialogTunnel::changeType(const QString &type) const
 {
+     Q_UNUSED(type);
+     const QString tunnelType = tunnelTypeCombo->currentData().toString();
      tunnelEndpointCombo->clear();
-     tunnelEndpointCombo->addItem("Teamserver");
-     if (type == "Socks5") {
+     tunnelEndpointCombo->addItem(tr("Teamserver"), kEndpointTeamserver);
+     if (tunnelType == kTunnelSocks5) {
           tunnelStackWidget->setCurrentIndex(0);
-          tunnelEndpointCombo->addItem("Client");
+          tunnelEndpointCombo->addItem(tr("Client"), kEndpointClient);
      }
-     else if (type == "Socks4") {
+     else if (tunnelType == kTunnelSocks4) {
           tunnelStackWidget->setCurrentIndex(1);
-          tunnelEndpointCombo->addItem("Client");
+          tunnelEndpointCombo->addItem(tr("Client"), kEndpointClient);
      }
-     else if (type == "Local port forwarding") {
+     else if (tunnelType == kTunnelLpf) {
           tunnelStackWidget->setCurrentIndex(2);
-          tunnelEndpointCombo->addItem("Client");
+          tunnelEndpointCombo->addItem(tr("Client"), kEndpointClient);
      }
-     else if (type == "Reverse port forwarding") {
+     else if (tunnelType == kTunnelRpf) {
           tunnelStackWidget->setCurrentIndex(3);
      }
 }
@@ -224,14 +237,14 @@ void DialogTunnel::onSocks5AuthCheckChange() const
 
 void DialogTunnel::onButtonCreate()
 {
-     QString type = tunnelTypeCombo->currentText();
+     const QString type = tunnelTypeCombo->currentData().toString();
 
      QJsonObject dataJson;
      dataJson["agent_id"] = this->AgentId;
      dataJson["desc"]     = this->tunnelDescInput->text();
-     dataJson["listen"]   = this->tunnelEndpointCombo->currentText() == "Teamserver";
+     dataJson["listen"]   = this->tunnelEndpointCombo->currentData().toString() == kEndpointTeamserver;
 
-     if (type == "Socks5") {
+     if (type == kTunnelSocks5) {
           QString l_host   = this->socks5LocalAddrInput->text();
           int     l_port   = this->socks5LocalPortSpin->value();
           bool    use_auth = this->socks5UseAuth->isChecked();
@@ -240,20 +253,20 @@ void DialogTunnel::onButtonCreate()
 
           if (l_host.isEmpty()) {
                this->valid   = false;
-               this->message = "Listen host must be set";
+               this->message = tr("Listen host must be set");
                this->close();
                return;
           }
           if (use_auth) {
                if (username.isEmpty()) {
                     this->valid   = false;
-                    this->message = "Username host must be set";
+                    this->message = tr("Username must be set");
                     this->close();
                     return;
                }
                if (password.isEmpty()) {
                     this->valid   = false;
-                    this->message = "Password host must be set";
+                    this->message = tr("Password must be set");
                     this->close();
                     return;
                }
@@ -263,7 +276,7 @@ void DialogTunnel::onButtonCreate()
                password = "";
           }
 
-          this->tunnelType = "socks5";
+          this->tunnelType = kTunnelSocks5;
           this->valid = true;
           dataJson["l_host"]   = l_host;
           dataJson["l_port"]   = l_port;
@@ -272,24 +285,24 @@ void DialogTunnel::onButtonCreate()
           dataJson["password"] = password;
 
      }
-     else if (type == "Socks4") {
+     else if (type == kTunnelSocks4) {
           QString l_host = this->socks4LocalAddrInput->text();
           int     l_port = this->socks4LocalPortSpin->value();
 
           if (l_host.isEmpty()) {
                this->valid   = false;
-               this->message = "Listen host must be set";
+               this->message = tr("Listen host must be set");
                this->close();
                return;
           }
 
-          this->tunnelType = "socks4";
+          this->tunnelType = kTunnelSocks4;
           this->valid = true;
           dataJson["l_host"] = l_host;
           dataJson["l_port"] = l_port;
 
      }
-     else if (type == "Local port forwarding") {
+     else if (type == kTunnelLpf) {
           QString l_host = this->lpfLocalAddrInput->text();
           int     l_port = this->lpfLocalPortSpin->value();
           QString t_host = this->lpfTargetAddrInput->text();
@@ -297,18 +310,18 @@ void DialogTunnel::onButtonCreate()
 
           if (l_host.isEmpty()) {
                this->valid   = false;
-               this->message = "Listen host must be set";
+               this->message = tr("Listen host must be set");
                this->close();
                return;
           }
           if (t_host.isEmpty()) {
                this->valid   = false;
-               this->message = "Target host must be set";
+               this->message = tr("Target host must be set");
                this->close();
                return;
           }
 
-          this->tunnelType = "lportfwd";
+          this->tunnelType = kTunnelLpf;
           this->valid = true;
           dataJson["l_host"] = l_host;
           dataJson["l_port"] = l_port;
@@ -316,19 +329,19 @@ void DialogTunnel::onButtonCreate()
           dataJson["t_port"] = t_port;
 
      }
-     else if (type == "Reverse port forwarding") {
+     else if (type == kTunnelRpf) {
           int     port   = this->rpfPortSpin->value();
           QString t_host = this->rpfTargetAddrInput->text();
           int     t_port = this->rpfTargetPortSpin->value();
 
           if (t_host.isEmpty()) {
                this->valid   = false;
-               this->message = "Target host must be set";
+               this->message = tr("Target host must be set");
                this->close();
                return;
           }
 
-          this->tunnelType = "rportfwd";
+          this->tunnelType = kTunnelRpf;
           this->valid = true;
           dataJson["port"]   = port;
           dataJson["t_host"] = t_host;
@@ -336,7 +349,7 @@ void DialogTunnel::onButtonCreate()
 
      }
      else {
-          this->message = "Unknown tunnel type";
+          this->message = tr("Unknown tunnel type");
           this->valid = false;
           this->close();
           return;

@@ -12,7 +12,7 @@
 #include <Client/AxScript/AxScriptManager.h>
 #include <MainAdaptix.h>
 
-REGISTER_DOCK_WIDGET(AxConsoleWidget, "Extension Console", false)
+REGISTER_DOCK_WIDGET(AxConsoleWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Extension Console"), false)
 
 AxConsoleWidget::AxConsoleWidget(AxScriptManager* m, AdaptixWidget* w) : DockTab("AxScript Console", w->GetProfile()->GetProject(), ":/icons/code_blocks"), adaptixWidget(w), scriptManager(m)
 {

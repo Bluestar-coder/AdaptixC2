@@ -12,19 +12,19 @@
 
 void DialogAgent::createUI()
 {
-    this->setWindowTitle("Generate Agent");
+    this->setWindowTitle(tr("Generate Agent"));
     this->setProperty("Main", "base");
 
-    listenerLabel = new QLabel("Listener:", this);
+    listenerLabel = new QLabel(tr("Listener:"), this);
     listenerInput = new QLineEdit(this);
     listenerInput->setReadOnly(true);
 
     listenerDisplayEdit = new QLineEdit(this);
     listenerDisplayEdit->setReadOnly(true);
-    listenerDisplayEdit->setPlaceholderText("Click to select listeners...");
+    listenerDisplayEdit->setPlaceholderText(tr("Click to select listeners..."));
 
     listenerSelectBtn = new QPushButton("...", this);
-    listenerSelectBtn->setToolTip("Select listeners");
+    listenerSelectBtn->setToolTip(tr("Select listeners"));
 
     listenerListWidget = new QListWidget();
     listenerListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -34,9 +34,9 @@ void DialogAgent::createUI()
     listenerListWidget->setMinimumHeight(150);
 
     btnMoveUp = new QPushButton("↑");
-    btnMoveUp->setToolTip("Move selected listener up");
+    btnMoveUp->setToolTip(tr("Move selected listener up"));
     btnMoveDown = new QPushButton("↓");
-    btnMoveDown->setToolTip("Move selected listener down");
+    btnMoveDown->setToolTip(tr("Move selected listener down"));
 
     auto btnLayout = new QVBoxLayout();
     btnLayout->setContentsMargins(0, 0, 0, 0);
@@ -63,18 +63,18 @@ void DialogAgent::createUI()
     listenerSelectionLayout->addWidget(listenerSelectBtn);
     listenerSelectionWidget->setVisible(false);
 
-    agentLabel    = new QLabel("Agent:", this);
+    agentLabel    = new QLabel(tr("Agent:"), this);
     agentCombobox = new QComboBox(this);
 
-    profileLabel = new QLabel("Profile:", this);
+    profileLabel = new QLabel(tr("Profile:"), this);
 
     inputProfileName = new QLineEdit(this);
-    inputProfileName->setToolTip("Profile name");
+    inputProfileName->setToolTip(tr("Profile name"));
 
     actionSaveProfile = new QAction(this);
     actionSaveProfile->setCheckable(true);
     actionSaveProfile->setChecked(true);
-    actionSaveProfile->setToolTip("Click to toggle: Save as profile");
+    actionSaveProfile->setToolTip(tr("Click to toggle: Save as profile"));
     actionSaveProfile->setIcon(QIcon(":/icons/check"));
     inputProfileName->addAction(actionSaveProfile, QLineEdit::TrailingPosition);
 
@@ -87,22 +87,22 @@ void DialogAgent::createUI()
     // stackGridLayout->setRowStretch(0, 1);
     // stackGridLayout->setColumnStretch(0, 1);
 
-    agentConfigGroupbox = new QGroupBox("Agent config", this);
+    agentConfigGroupbox = new QGroupBox(tr("Agent config"), this);
     agentConfigGroupbox->setAlignment(Qt::AlignHCenter);
     agentConfigGroupbox->setLayout(stackGridLayout);
 
-    buildButton = new QPushButton("Generate", this);
+    buildButton = new QPushButton(tr("Generate"), this);
     buildButton->setDefault(true);
     buildButton->setFixedWidth(160);
     buildButton->setFocus();
 
     menuContext = new QMenu(this);
-    menuContext->addAction("Rename", this, &DialogAgent::onProfileRename);
-    menuContext->addAction("Remove", this, &DialogAgent::onProfileRemove);
+    menuContext->addAction(tr("Rename"), this, &DialogAgent::onProfileRename);
+    menuContext->addAction(tr("Remove"), this, &DialogAgent::onProfileRemove);
 
     label_Profiles = new QLabel(this);
     label_Profiles->setAlignment(Qt::AlignCenter);
-    label_Profiles->setText("Profiles");
+    label_Profiles->setText(tr("Profiles"));
 
     cardWidget = new CardListWidget(this);
     cardWidget->setFixedWidth(220);
@@ -112,18 +112,18 @@ void DialogAgent::createUI()
     cardWidget->setFocusPolicy(Qt::NoFocus);
 
     buttonNewProfile = new QPushButton(this);
-    buttonNewProfile->setText("New Profile");
+    buttonNewProfile->setText(tr("New Profile"));
     buttonNewProfile->setMinimumSize(QSize(10, 30));
 
     buttonLoad = new QPushButton(QIcon(":/icons/file_open"), "", this);
     buttonLoad->setIconSize(QSize(20, 20));
     buttonLoad->setFixedSize(QSize(30, 30));
-    buttonLoad->setToolTip("Load profile from file");
+    buttonLoad->setToolTip(tr("Load profile from file"));
 
     buttonSave = new QPushButton(QIcon(":/icons/save_as"), "", this);
     buttonSave->setIconSize(QSize(20, 20));
     buttonSave->setFixedSize(QSize(30, 30));
-    buttonSave->setToolTip("Save profile to file");
+    buttonSave->setToolTip(tr("Save profile to file"));
 
     auto leftPanelLayout = new QGridLayout();
     leftPanelLayout->setVerticalSpacing(8);
@@ -184,7 +184,7 @@ void DialogAgent::createUI()
     auto profilesPanel = new QWidget(this);
     profilesPanel->setLayout(profilesLayout);
 
-    collapseButton = new QPushButton(QIcon(":/icons/arrow_drop_down"), " build log", this);
+    collapseButton = new QPushButton(QIcon(":/icons/arrow_drop_down"), tr("Build log"), this);
     collapseButton->setFlat(true);
     collapseButton->setIconSize(QSize(16, 16));
     collapseButton->setFixedHeight(24);
@@ -371,7 +371,7 @@ void DialogAgent::onButtonLoad()
     QPointer<DialogAgent> safeThis = this;
     QString currentListenerType = listenerType;
 
-    NonBlockingDialogs::getOpenFileName(this, "Select file", baseDir, "JSON files (*.json)",
+    NonBlockingDialogs::getOpenFileName(this, tr("Select file"), baseDir, tr("JSON files (*.json)"),
         [safeThis, currentListenerType](const QString& filePath) {
             if (filePath.isEmpty())
                 return;
@@ -386,26 +386,26 @@ void DialogAgent::onButtonLoad()
             QJsonParseError parseError;
             QJsonDocument document = QJsonDocument::fromJson(fileContent, &parseError);
             if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
-                MessageError("Error JSON parse");
+                MessageError(DialogAgent::tr("Error parsing JSON"));
                 return;
             }
             QJsonObject jsonObject = document.object();
 
             if ( !jsonObject.contains("listener_type") || !jsonObject["listener_type"].isString() ) {
-                MessageError("Required parameter 'listener_type' is missing");
+                MessageError(DialogAgent::tr("Required parameter 'listener_type' is missing"));
                 return;
             }
             if ( !jsonObject.contains("agent") || !jsonObject["agent"].isString() ) {
-                MessageError("Required parameter 'agent' is missing");
+                MessageError(DialogAgent::tr("Required parameter 'agent' is missing"));
                 return;
             }
             if ( !jsonObject.contains("config") || !jsonObject["config"].isString() ) {
-                MessageError("Required parameter 'config' is missing");
+                MessageError(DialogAgent::tr("Required parameter 'config' is missing"));
                 return;
             }
 
             if(currentListenerType != jsonObject["listener_type"].toString()) {
-                MessageError("Listener type mismatch");
+                MessageError(DialogAgent::tr("Listener type mismatch"));
                 return;
             }
 
@@ -415,7 +415,7 @@ void DialogAgent::onButtonLoad()
             QString agentType = jsonObject["agent"].toString();
             int typeIndex = safeThis->agentCombobox->findText( agentType );
             if ( typeIndex == -1 ) {
-                MessageError("No such agent exists");
+                MessageError(DialogAgent::tr("No such agent exists"));
                 return;
             }
             safeThis->agentCombobox->setCurrentIndex(typeIndex);
@@ -443,14 +443,14 @@ void DialogAgent::onButtonSave()
     QString tmpFilename = QString("%1_config.json").arg(configType);
     QString baseDir     = authProfile.GetProjectDir();
     QString initialPath = QDir(baseDir).filePath(tmpFilename);
-    NonBlockingDialogs::getSaveFileName(this, "Save File", initialPath, "JSON files (*.json)",
+    NonBlockingDialogs::getSaveFileName(this, tr("Save File"), initialPath, tr("JSON files (*.json)"),
         [this, fileContent](const QString& filePath) {
             if (filePath.isEmpty())
                 return;
 
             QFile file(filePath);
             if (!file.open(QIODevice::WriteOnly)) {
-                MessageError("Failed to open file for writing");
+                MessageError(tr("Failed to open file for writing"));
                 return;
             }
 
@@ -458,8 +458,8 @@ void DialogAgent::onButtonSave()
             file.close();
 
             QInputDialog inputDialog;
-            inputDialog.setWindowTitle("Save config");
-            inputDialog.setLabelText("File saved to:");
+            inputDialog.setWindowTitle(tr("Save config"));
+            inputDialog.setLabelText(tr("File saved to:"));
             inputDialog.setTextEchoMode(QLineEdit::Normal);
             inputDialog.setTextValue(filePath);
             inputDialog.adjustSize();
@@ -482,7 +482,7 @@ void DialogAgent::changeConfig(const QString &agentName)
     bool isMultiListeners = typeInfo.multiListeners;
     listenerSelectionWidget->setVisible(isMultiListeners);
     listenerInput->setVisible(!isMultiListeners);
-    listenerLabel->setText(isMultiListeners ? "Listeners:" : "Listener:");
+    listenerLabel->setText(isMultiListeners ? tr("Listeners:") : tr("Listener:"));
 
     if (isMultiListeners) {
         QStringList supportedTypes = typeInfo.listenerTypes;
@@ -627,7 +627,7 @@ void DialogAgent::onProfileSelected()
     QJsonParseError parseError;
     QJsonDocument document = QJsonDocument::fromJson(profileData.toUtf8(), &parseError);
     if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
-        MessageError("Error parsing profile data");
+        MessageError(tr("Error parsing profile data"));
         return;
     }
 
@@ -687,7 +687,7 @@ void DialogAgent::onProfileRename()
         return;
 
     bool ok;
-    QString newName = QInputDialog::getText(this, "Rename Profile", "New profile name:", QLineEdit::Normal, oldName, &ok);
+    QString newName = QInputDialog::getText(this, tr("Rename Profile"), tr("New profile name:"), QLineEdit::Normal, oldName, &ok);
     if (!ok || newName.trimmed().isEmpty() || newName == oldName)
         return;
 
@@ -749,7 +749,7 @@ void DialogAgent::onButtonBuild()
             }
         }
         if (selectedListeners.isEmpty()) {
-            MessageError("Please select at least one listener");
+            MessageError(tr("Please select at least one listener"));
             return;
         }
     } else {
@@ -761,7 +761,7 @@ void DialogAgent::onButtonBuild()
     buildLogOutput->setVisible(true);
     collapseButton->setIcon(QIcon(":/icons/arrow_drop_down"));
 
-    buildButton->setText("Stop");
+    buildButton->setText(tr("Stop"));
 
     QString urlTemplate = "wss://%1:%2%3/channel";
     QString sUrl = urlTemplate.arg(authProfile.GetHost()).arg(authProfile.GetPort()).arg(authProfile.GetEndpoint());
@@ -777,8 +777,8 @@ void DialogAgent::onButtonBuild()
     QString otp;
     bool otpResult = HttpReqGetOTP("channel_agent_build", otpData, authProfile.GetURL(), authProfile.GetAccessToken(), &otp);
     if (!otpResult) {
-        buildButton->setText("Build");
-        MessageError("Failed to generate OTP for build");
+        buildButton->setText(tr("Build"));
+        MessageError(tr("Failed to generate OTP for build"));
         return;
     }
 
@@ -800,7 +800,7 @@ void DialogAgent::onButtonBuild()
 
 void DialogAgent::onBuildConnected()
 {
-    buildLogOutput->append("----- Build process start -----");
+    buildLogOutput->append(tr("----- Build process start -----"));
 }
 
 void DialogAgent::onBuildMessage(const QString &msg)
@@ -851,14 +851,14 @@ void DialogAgent::onBuildMessage(const QString &msg)
             QString initialPath = QDir(baseDir).filePath(filename);
 
             QPointer<DialogAgent> safeThis = this;
-            NonBlockingDialogs::getSaveFileName(this, "Save File", initialPath, "All Files (*.*)",
+            NonBlockingDialogs::getSaveFileName(this, tr("Save File"), initialPath, tr("All Files (*.*)"),
                 [safeThis, content](const QString& filePath) {
                     if (filePath.isEmpty())
                         return;
 
                     QFile file(filePath);
                     if (!file.open(QIODevice::WriteOnly)) {
-                        MessageError("Failed to open file for writing");
+                        MessageError(DialogAgent::tr("Failed to open file for writing"));
                         return;
                     }
 
@@ -866,7 +866,7 @@ void DialogAgent::onBuildMessage(const QString &msg)
                     file.close();
 
                     if (safeThis) {
-                        safeThis->buildLogOutput->append(QString("<span style='color: #dcdcaa;'>[+]</span> File saved: %1").arg(filePath.toHtmlEscaped()));
+                        safeThis->buildLogOutput->append(QString("<span style='color: #dcdcaa;'>[+]</span> %1").arg(DialogAgent::tr("File saved: %1").arg(filePath.toHtmlEscaped())));
                     }
                 });
             return;
@@ -881,9 +881,9 @@ void DialogAgent::onBuildMessage(const QString &msg)
 
 void DialogAgent::onBuildFinished()
 {
-    buildLogOutput->append("----- Build process finished -----");
+    buildLogOutput->append(tr("----- Build process finished -----"));
 
-    buildButton->setText("Build");
+    buildButton->setText(tr("Build"));
 
     buildWorker = nullptr;
     buildThread = nullptr;
@@ -908,7 +908,7 @@ void DialogAgent::stopBuild()
 
         buildLogPanel->setVisible(false);
 
-        buildButton->setText("Build");
+        buildButton->setText(tr("Build"));
     });
 
     QMetaObject::invokeMethod(worker, "stop", Qt::QueuedConnection);

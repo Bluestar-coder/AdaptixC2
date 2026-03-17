@@ -6,6 +6,7 @@
 
 class DialogAgentData : public QDialog
 {
+    Q_DECLARE_TR_FUNCTIONS(DialogAgentData)
 
     QVBoxLayout* mainLayout        = nullptr;
     QHBoxLayout* hLayoutBottom     = nullptr;

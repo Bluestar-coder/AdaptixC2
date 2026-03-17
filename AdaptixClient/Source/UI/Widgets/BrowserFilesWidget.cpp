@@ -9,7 +9,7 @@
 #include <Client/AuthProfile.h>
 #include <Client/AxScript/AxScriptManager.h>
 
-REGISTER_DOCK_WIDGET(BrowserFilesWidget, "Browser Files", false)
+REGISTER_DOCK_WIDGET(BrowserFilesWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Browser Files"), false)
 
 void BrowserFileData::CreateBrowserFileData(const QString &path, const int os)
 {
@@ -50,7 +50,8 @@ void BrowserFileData::SetStored(const bool stored)
 
 
 
-BrowserFilesWidget::BrowserFilesWidget(const AdaptixWidget* w, Agent* a) : DockTab(QString("Files [%1]").arg( a->data.Id ), w->GetProfile()->GetProject())
+BrowserFilesWidget::BrowserFilesWidget(const AdaptixWidget* w, Agent* a)
+    : DockTab(BrowserFilesWidget::tr("Files [%1]").arg(a->data.Id), w->GetProfile()->GetProject())
 {
     agent = a;
     this->createUI();
@@ -80,12 +81,12 @@ void BrowserFilesWidget::createUI()
     buttonReload = new QPushButton(QIcon(":/icons/reload"), "", this);
     buttonReload->setIconSize( QSize( 24,24 ));
     buttonReload->setFixedSize(37, 28);
-    buttonReload->setToolTip("Reload");
+    buttonReload->setToolTip(tr("Reload"));
 
     buttonParent = new QPushButton(QIcon(":/icons/folder"), "", this);
     buttonParent->setIconSize(QSize(24, 24 ));
     buttonParent->setFixedSize(37, 28);
-    buttonParent->setToolTip("Up folder");
+    buttonParent->setToolTip(tr("Up folder"));
 
     inputPath = new QLineEdit(this);
 
@@ -100,19 +101,19 @@ void BrowserFilesWidget::createUI()
     buttonDisks = new QPushButton(QIcon(":/icons/storage"), "", this);
     buttonDisks->setIconSize( QSize( 24,24 ));
     buttonDisks->setFixedSize(37, 28);
-    buttonDisks->setToolTip("Disks list");
+    buttonDisks->setToolTip(tr("Disks list"));
 
     buttonUpload = new QPushButton(QIcon(":/icons/upload"), "", this);
     buttonUpload->setIconSize( QSize( 24,24 ));
     buttonUpload->setFixedSize(37, 28);
-    buttonUpload->setToolTip("Upload File");
+    buttonUpload->setToolTip(tr("Upload File"));
 
     line_2 = new QFrame(this);
     line_2->setFrameShape(QFrame::VLine);
     line_2->setMinimumHeight(25);
 
     statusLabel = new QLabel(this);
-    statusLabel->setText("Status: ");
+    statusLabel->setText(tr("Status: "));
 
     tableModel = new QStandardItemModel(this);
 
@@ -136,19 +137,19 @@ void BrowserFilesWidget::createUI()
 
     if (agent->data.Os == OS_WINDOWS) {
         tableModel->setColumnCount(3);
-        tableModel->setHorizontalHeaderItem( 0, new QStandardItem( "Name" ) );
-        tableModel->setHorizontalHeaderItem( 1, new QStandardItem( "Size" ) );
-        tableModel->setHorizontalHeaderItem( 2, new QStandardItem( "Last Modified" ) );
+        tableModel->setHorizontalHeaderItem( 0, new QStandardItem( tr("Name") ) );
+        tableModel->setHorizontalHeaderItem( 1, new QStandardItem( tr("Size") ) );
+        tableModel->setHorizontalHeaderItem( 2, new QStandardItem( tr("Last Modified") ) );
         tableView->setIconSize(QSize(25, 25));
     }
     else {
         tableModel->setColumnCount(6);
-        tableModel->setHorizontalHeaderItem( 0, new QStandardItem( "Name" ) );
-        tableModel->setHorizontalHeaderItem( 1, new QStandardItem( "Mode" ) );
-        tableModel->setHorizontalHeaderItem( 2, new QStandardItem( "User" ) );
-        tableModel->setHorizontalHeaderItem( 3, new QStandardItem( "Group" ) );
-        tableModel->setHorizontalHeaderItem( 4, new QStandardItem( "Size" ) );
-        tableModel->setHorizontalHeaderItem( 5, new QStandardItem( "Last Modified" ) );
+        tableModel->setHorizontalHeaderItem( 0, new QStandardItem( tr("Name") ) );
+        tableModel->setHorizontalHeaderItem( 1, new QStandardItem( tr("Mode") ) );
+        tableModel->setHorizontalHeaderItem( 2, new QStandardItem( tr("User") ) );
+        tableModel->setHorizontalHeaderItem( 3, new QStandardItem( tr("Group") ) );
+        tableModel->setHorizontalHeaderItem( 4, new QStandardItem( tr("Size") ) );
+        tableModel->setHorizontalHeaderItem( 5, new QStandardItem( tr("Last Modified") ) );
         tableView->setIconSize(QSize(25, 25));
     }
 
@@ -174,7 +175,7 @@ void BrowserFilesWidget::createUI()
     treeBrowserWidget = new QTreeWidget();
     treeBrowserWidget->setSortingEnabled(false);
     treeBrowserWidget->setExpandsOnDoubleClick(false);
-    treeBrowserWidget->headerItem()->setText( 0, "Directory Tree" );
+    treeBrowserWidget->headerItem()->setText( 0, tr("Directory Tree") );
     treeBrowserWidget->setIconSize(QSize(25, 25));
 
     splitter = new QSplitter( this );
@@ -608,7 +609,7 @@ void BrowserFilesWidget::onUpload() const
     if (agent && agent->adaptixWidget && agent->adaptixWidget->GetProfile())
         baseDir = agent->adaptixWidget->GetProfile()->GetProjectDir();
 
-    NonBlockingDialogs::getOpenFileName(const_cast<BrowserFilesWidget*>(this), "Select file", baseDir, "All Files (*.*)",
+    NonBlockingDialogs::getOpenFileName(const_cast<BrowserFilesWidget*>(this), tr("Select file"), baseDir, tr("All Files (*.*)"),
         [this, remotePath](const QString& filePath) {
             if (filePath.isEmpty())
                 return;

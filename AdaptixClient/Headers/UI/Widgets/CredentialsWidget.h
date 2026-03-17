@@ -222,12 +222,19 @@ public:
         if (role != Qt::DisplayRole || o != Qt::Horizontal)
             return {};
 
-        static QStringList headers = {
-            "CredId","Username","Password","Realm","Type",
-            "Tag","Date","Storage","Agent","Host"
-        };
-
-        return headers.value(section);
+        switch (section) {
+            case CC_Id:       return tr("CredId");
+            case CC_Username: return tr("Username");
+            case CC_Password: return tr("Password");
+            case CC_Realm:    return tr("Realm");
+            case CC_Type:     return tr("Type");
+            case CC_Tag:      return tr("Tag");
+            case CC_Date:     return tr("Date");
+            case CC_Storage:  return tr("Storage");
+            case CC_Agent:    return tr("Agent");
+            case CC_Host:     return tr("Host");
+            default:          return {};
+        }
     }
 
     void add(const CredentialData& item) {

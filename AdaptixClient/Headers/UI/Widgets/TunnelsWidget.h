@@ -195,12 +195,21 @@ public:
         if (role != Qt::DisplayRole || o != Qt::Horizontal)
             return {};
 
-        static QStringList headers = {
-            "Tunnel ID", "Agent ID", "Computer", "User", "Process", "Type",
-            "Info", "Interface", "Listen port", "Client", "Target host", "Target port"
-        };
-
-        return headers.value(section);
+        switch (section) {
+            case TUC_TunnelId:  return tr("Tunnel ID");
+            case TUC_AgentId:   return tr("Agent ID");
+            case TUC_Computer:  return tr("Computer");
+            case TUC_User:      return tr("User");
+            case TUC_Process:   return tr("Process");
+            case TUC_Type:      return tr("Type");
+            case TUC_Info:      return tr("Info");
+            case TUC_Interface: return tr("Interface");
+            case TUC_Port:      return tr("Listen port");
+            case TUC_Client:    return tr("Client");
+            case TUC_Fhost:     return tr("Target host");
+            case TUC_Fport:     return tr("Target port");
+            default:            return {};
+        }
     }
 
     void add(const TunnelData& item) {

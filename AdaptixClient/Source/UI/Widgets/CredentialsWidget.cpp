@@ -8,9 +8,9 @@
 #include <Utils/CustomElements.h>
 #include <Utils/NonBlockingDialogs.h>
 
-REGISTER_DOCK_WIDGET(CredentialsWidget, "Credentials", true)
+REGISTER_DOCK_WIDGET(CredentialsWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Credentials"), true)
 
-CredentialsWidget::CredentialsWidget(AdaptixWidget* w) : DockTab("Credentials", w->GetProfile()->GetProject(), ":/icons/key"), adaptixWidget(w)
+CredentialsWidget::CredentialsWidget(AdaptixWidget* w) : DockTab(tr("Credentials"), w->GetProfile()->GetProject(), ":/icons/key"), adaptixWidget(w)
 {
     this->createUI();
 
@@ -94,24 +94,24 @@ void CredentialsWidget::createUI()
     searchWidget->setVisible(false);
 
     inputFilter = new QLineEdit(searchWidget);
-    inputFilter->setPlaceholderText("filter: (adm | user) & aes256");
+    inputFilter->setPlaceholderText(tr("filter: (adm | user) & aes256"));
     inputFilter->setMaximumWidth(300);
 
-    autoSearchCheck = new QCheckBox("auto", searchWidget);
+    autoSearchCheck = new QCheckBox(tr("auto"), searchWidget);
     autoSearchCheck->setChecked(true);
-    autoSearchCheck->setToolTip("Auto search on text change. If unchecked, press Enter to search.");
+    autoSearchCheck->setToolTip(tr("Auto search on text change. If unchecked, press Enter to search."));
 
     typeComboBox = new QComboBox(searchWidget);
     typeComboBox->setMinimumWidth(150);
     typeComboBox->setEditable(true);
     typeComboBox->setInsertPolicy(QComboBox::NoInsert);
-    typeComboBox->addItem("All Types");
+    typeComboBox->addItem(tr("All Types"), "");
 
     storageComboBox = new QComboBox(searchWidget);
     storageComboBox->setMinimumWidth(150);
     storageComboBox->setEditable(true);
     storageComboBox->setInsertPolicy(QComboBox::NoInsert);
-    storageComboBox->addItem("All Storages");
+    storageComboBox->addItem(tr("All Storages"), "");
 
     hideButton = new ClickableLabel("  x  ");
     hideButton->setCursor(Qt::PointingHandCursor);
@@ -295,35 +295,37 @@ void CredentialsWidget::UpdateFilterComboBoxes() const
         }
     }
 
-    QString currentType = typeComboBox->currentText();
-    QString currentStorage = storageComboBox->currentText();
+    QString currentType = typeComboBox->currentData().toString();
+    if (currentType.isEmpty() && typeComboBox->currentText() != tr("All Types"))
+        currentType = typeComboBox->currentText();
+    QString currentStorage = storageComboBox->currentData().toString();
+    if (currentStorage.isEmpty() && storageComboBox->currentText() != tr("All Storages"))
+        currentStorage = storageComboBox->currentText();
 
     typeComboBox->blockSignals(true);
     storageComboBox->blockSignals(true);
 
     typeComboBox->clear();
-    typeComboBox->addItem("All Types");
+    typeComboBox->addItem(tr("All Types"), "");
     QStringList typeList = types.values();
     typeList.sort();
-    typeComboBox->addItems(typeList);
+    for (const auto& type : typeList)
+        typeComboBox->addItem(type, type);
 
     storageComboBox->clear();
-    storageComboBox->addItem("All Storages");
+    storageComboBox->addItem(tr("All Storages"), "");
     QStringList storageList = storages.values();
     storageList.sort();
-    storageComboBox->addItems(storageList);
+    for (const auto& storage : storageList)
+        storageComboBox->addItem(storage, storage);
 
-    int typeIdx = typeComboBox->findText(currentType);
+    int typeIdx = typeComboBox->findData(currentType);
     if (typeIdx >= 0)
         typeComboBox->setCurrentIndex(typeIdx);
-    else
-        typeComboBox->setCurrentText(currentType);
 
-    int storageIdx = storageComboBox->findText(currentStorage);
+    int storageIdx = storageComboBox->findData(currentStorage);
     if (storageIdx >= 0)
         storageComboBox->setCurrentIndex(storageIdx);
-    else
-        storageComboBox->setCurrentText(currentStorage);
 
     typeComboBox->blockSignals(false);
     storageComboBox->blockSignals(false);
@@ -392,23 +394,21 @@ void CredentialsWidget::onFilterUpdate() const
 void CredentialsWidget::onTypeFilterUpdate(const QString &text) const
 {
     QString filterText = text;
-    if (filterText == "All Types")
-        filterText.clear();
-    proxyModel->setTypeFilter(filterText);
+    Q_UNUSED(filterText);
+    proxyModel->setTypeFilter(typeComboBox->currentData().toString());
 }
 
 void CredentialsWidget::onStorageFilterUpdate(const QString &text) const
 {
     QString filterText = text;
-    if (filterText == "All Storages")
-        filterText.clear();
-    proxyModel->setStorageFilter(filterText);
+    Q_UNUSED(filterText);
+    proxyModel->setStorageFilter(storageComboBox->currentData().toString());
 }
 
 void CredentialsWidget::handleCredentialsMenu(const QPoint &pos ) const
 {
     auto ctxMenu = QMenu();
-    ctxMenu.addAction("Create", this, &CredentialsWidget::onCreateCreds );
+    ctxMenu.addAction(tr("Create"), this, &CredentialsWidget::onCreateCreds );
 
     QModelIndex index = tableView->indexAt(pos);
     if (index.isValid()) {
@@ -422,17 +422,17 @@ void CredentialsWidget::handleCredentialsMenu(const QPoint &pos ) const
             creds.append(taskId);
         }
 
-        ctxMenu.addAction("Edit",   this, &CredentialsWidget::onEditCreds );
-        ctxMenu.addAction("Remove", this, &CredentialsWidget::onRemoveCreds );
+        ctxMenu.addAction(tr("Edit"),   this, &CredentialsWidget::onEditCreds );
+        ctxMenu.addAction(tr("Remove"), this, &CredentialsWidget::onRemoveCreds );
         ctxMenu.addSeparator();
 
         int centerCount = adaptixWidget->ScriptManager->AddMenuCreds(&ctxMenu, "Creds", creds);
         if (centerCount > 0)
             ctxMenu.addSeparator();
 
-        ctxMenu.addAction("Set tag",           this, &CredentialsWidget::onSetTag );
-        ctxMenu.addAction("Export to file",    this, &CredentialsWidget::onExportCreds );
-        ctxMenu.addAction("Copy to clipboard", this, &CredentialsWidget::onCopyToClipboard );
+        ctxMenu.addAction(tr("Set tag"),           this, &CredentialsWidget::onSetTag );
+        ctxMenu.addAction(tr("Export to file"),    this, &CredentialsWidget::onExportCreds );
+        ctxMenu.addAction(tr("Copy to clipboard"), this, &CredentialsWidget::onCopyToClipboard );
     }
 
     QPoint globalPos = tableView->mapToGlobal(pos);
@@ -517,7 +517,7 @@ void CredentialsWidget::onEditCreds() const
 
     HttpReqCredentialsEditAsync(jsonData, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Server is not responding" : message);
+            MessageError(message.isEmpty() ? CredentialsWidget::tr("Server is not responding") : message);
     });
 }
 
@@ -538,7 +538,7 @@ void CredentialsWidget::onRemoveCreds() const
 
     HttpReqCredentialsRemoveAsync(listId, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Response timeout" : message);
+            MessageError(message.isEmpty() ? CredentialsWidget::tr("Response timeout") : message);
     });
 }
 
@@ -548,8 +548,8 @@ void CredentialsWidget::onExportCreds() const
     if (!idx.isValid()) return;
 
     QInputDialog dialog;
-    dialog.setWindowTitle("Format for saving");
-    dialog.setLabelText("Format:");
+    dialog.setWindowTitle(tr("Format for saving"));
+    dialog.setLabelText(tr("Format:"));
     dialog.setTextValue("%realm%\\%username%:%password%");
     QLineEdit *lineEdit = dialog.findChild<QLineEdit*>();
     if (lineEdit) {
@@ -565,14 +565,14 @@ void CredentialsWidget::onExportCreds() const
     if (adaptixWidget && adaptixWidget->GetProfile())
         baseDir = QDir(adaptixWidget->GetProfile()->GetProjectDir()).filePath(QStringLiteral("creds.txt"));
 
-    NonBlockingDialogs::getSaveFileName(const_cast<CredentialsWidget*>(this), "Save credentials", baseDir, "Text Files (*.txt);;All Files (*)",
+    NonBlockingDialogs::getSaveFileName(const_cast<CredentialsWidget*>(this), tr("Save credentials"), baseDir, tr("Text Files (*.txt);;All Files (*)"),
         [this, format](const QString& fileName) {
             if (fileName.isEmpty())
                 return;
 
             QFile file(fileName);
             if (!file.open(QIODevice::WriteOnly)) {
-                MessageError("Failed to open file for writing");
+                MessageError(tr("Failed to open file for writing"));
                 return;
             }
 
@@ -620,11 +620,11 @@ void CredentialsWidget::onSetTag() const
         return;
 
     bool inputOk;
-    QString newTag = QInputDialog::getText(nullptr, "Set tags", "New tag", QLineEdit::Normal,tag, &inputOk);
+    QString newTag = QInputDialog::getText(nullptr, tr("Set tags"), tr("New tag"), QLineEdit::Normal,tag, &inputOk);
     if ( inputOk ) {
         HttpReqCredentialsSetTagAsync(listId, newTag, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
             if (!success)
-                MessageError(message.isEmpty() ? "Response timeout" : message);
+                MessageError(message.isEmpty() ? CredentialsWidget::tr("Response timeout") : message);
         });
     }
 }
@@ -635,7 +635,7 @@ void CredentialsWidget::onCopyToClipboard() const
     if (!idx.isValid()) return;
 
     QInputDialog dialog;
-    dialog.setWindowTitle("Format for clipboard");
+    dialog.setWindowTitle(tr("Format for clipboard"));
     dialog.setComboBoxEditable(true);
     dialog.setTextValue("%realm%\\%username%:%password%");
     dialog.setComboBoxItems(QStringList()
@@ -648,7 +648,7 @@ void CredentialsWidget::onCopyToClipboard() const
         << "-u '%username%' -H '%password%' (netexec)"
         << "-u '%username%@%realm%' -p '%password%' (certipy)"
     );
-    dialog.setLabelText("Format:");
+    dialog.setLabelText(tr("Format:"));
     QLineEdit *lineEdit = dialog.findChild<QLineEdit*>();
     if (lineEdit)
         lineEdit->setMinimumWidth(400);

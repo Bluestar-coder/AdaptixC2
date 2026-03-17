@@ -13,26 +13,27 @@ DialogSaveTask::~DialogSaveTask() = default;
 void DialogSaveTask::createUI()
 {
     this->resize(900, 500);
-    this->setWindowTitle( "Save Task" );
+    this->setWindowTitle(tr("Save Task"));
     this->setProperty("Main", "base");
 
-    commandLineLabel = new QLabel("CommandLine:", this);
+    commandLineLabel = new QLabel(tr("Command line:"), this);
     commandLineInput = new QLineEdit(this);
 
-    messageLabel = new QLabel("Message:", this);
+    messageLabel = new QLabel(tr("Message:"), this);
     messageCombo = new QComboBox(this);
-    messageCombo->addItems(QStringList() << "Success" << "Error" );
+    messageCombo->addItem(tr("Success"), 7);
+    messageCombo->addItem(tr("Error"), 6);
     messageInput = new QLineEdit(this);
 
-    textLabel = new QLabel("Output:", this);
+    textLabel = new QLabel(tr("Output:"), this);
     textEdit  = new QTextEdit(this);
 
     spacer_1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Maximum);
     spacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Maximum);
 
-    createButton = new QPushButton("Save", this);
+    createButton = new QPushButton(tr("Save"), this);
     createButton->setDefault(true);
-    cancelButton = new QPushButton("Cancel", this);
+    cancelButton = new QPushButton(tr("Cancel"), this);
 
     hLayoutBottom = new QHBoxLayout();
     hLayoutBottom->addItem(spacer_1);
@@ -66,7 +67,7 @@ void DialogSaveTask::StartDialog(const QString &text)
     QString restLines = text.section('\n', 1);
 
     commandLineInput->setText(firstLine);
-    messageInput->setText("Remote Terminal output");
+    messageInput->setText(tr("Remote Terminal output"));
     textEdit->setText(restLines);
 
     this->valid = false;
@@ -88,9 +89,7 @@ void DialogSaveTask::onButtonSave()
         return;
     }
 
-    int type = 7;
-    if (messageCombo->currentText() == "Error")
-        type = 6;
+    const int type = messageCombo->currentData().toInt();
 
     data = {};
     data.CommandLine = commandLine;

@@ -182,7 +182,7 @@ public:
                 case DC_Date:      return d.Date;
                 case DC_Size:      return BytesToFormat(d.TotalSize);
                 case DC_Received:  return d.State == DOWNLOAD_STATE_FINISHED ? "" : BytesToFormat(d.RecvSize);
-                case DC_Progress:  return d.State == DOWNLOAD_STATE_FINISHED ? "Finished" : QString();
+                case DC_Progress:  return d.State == DOWNLOAD_STATE_FINISHED ? tr("Finished") : QString();
             }
         }
 
@@ -212,12 +212,19 @@ public:
         if (role != Qt::DisplayRole || o != Qt::Horizontal)
             return {};
 
-        static QStringList headers = {
-            "File ID", "Agent Type", "Agent ID", "User", "Computer",
-            "File", "Date", "Size", "Received", "Progress"
-        };
-
-        return headers.value(section);
+        switch (section) {
+            case DC_FileId:    return tr("File ID");
+            case DC_AgentName: return tr("Agent Type");
+            case DC_AgentId:   return tr("Agent ID");
+            case DC_User:      return tr("User");
+            case DC_Computer:  return tr("Computer");
+            case DC_File:      return tr("File");
+            case DC_Date:      return tr("Date");
+            case DC_Size:      return tr("Size");
+            case DC_Received:  return tr("Received");
+            case DC_Progress:  return tr("Progress");
+            default:           return {};
+        }
     }
 
     void add(const DownloadData& item) {

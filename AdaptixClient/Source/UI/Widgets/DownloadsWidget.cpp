@@ -17,9 +17,9 @@ static QString extractFileName(const QString& filePath)
     return pathParts.isEmpty() ? fileName : pathParts.last();
 }
 
-REGISTER_DOCK_WIDGET(DownloadsWidget, "Downloads", true)
+REGISTER_DOCK_WIDGET(DownloadsWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Downloads"), true)
 
-DownloadsWidget::DownloadsWidget(AdaptixWidget* w) : DockTab("Downloads", w->GetProfile()->GetProject(), ":/icons/downloads"), adaptixWidget(w)
+DownloadsWidget::DownloadsWidget(AdaptixWidget* w) : DockTab(tr("Downloads"), w->GetProfile()->GetProject(), ":/icons/downloads"), adaptixWidget(w)
 {
     this->createUI();
 
@@ -54,16 +54,16 @@ void DownloadsWidget::createUI()
     searchWidget->setVisible(false);
 
     inputFilter = new QLineEdit(searchWidget);
-    inputFilter->setPlaceholderText("filter: (exe | dll) & ^(temp)");
+    inputFilter->setPlaceholderText(tr("filter: (exe | dll) & ^(temp)"));
     inputFilter->setMaximumWidth(300);
 
-    autoSearchCheck = new QCheckBox("auto", searchWidget);
+    autoSearchCheck = new QCheckBox(tr("auto"), searchWidget);
     autoSearchCheck->setChecked(true);
-    autoSearchCheck->setToolTip("Auto search on text change. If unchecked, press Enter to search.");
+    autoSearchCheck->setToolTip(tr("Auto search on text change. If unchecked, press Enter to search."));
 
     stateComboBox = new QComboBox(searchWidget);
     stateComboBox->setMinimumWidth(100);
-    stateComboBox->addItems(QStringList() << "Any state" << "Running" << "Stopped" << "Finished");
+    stateComboBox->addItems(QStringList() << tr("Any state") << tr("Running") << tr("Stopped") << tr("Finished"));
 
     hideButton = new ClickableLabel("  x  ");
     hideButton->setCursor(Qt::PointingHandCursor);
@@ -297,11 +297,11 @@ void DownloadsWidget::handleDownloadsMenu(const QPoint &pos)
     auto ctxMenu = QMenu();
 
     if (download->State == DOWNLOAD_STATE_FINISHED) {
-        ctxMenu.addAction("Sync file to client", this, &DownloadsWidget::actionSync);
+        ctxMenu.addAction(tr("Sync file to client"), this, &DownloadsWidget::actionSync);
 
-        auto syncMenu = new QMenu("Sync as ...", &ctxMenu);
-        syncMenu->addAction("Curl command", this, &DownloadsWidget::actionSyncCurl);
-        syncMenu->addAction("Wget command", this, &DownloadsWidget::actionSyncWget);
+        auto syncMenu = new QMenu(tr("Sync as ..."), &ctxMenu);
+        syncMenu->addAction(tr("Curl command"), this, &DownloadsWidget::actionSyncCurl);
+        syncMenu->addAction(tr("Wget command"), this, &DownloadsWidget::actionSyncWget);
         ctxMenu.addMenu(syncMenu);
         ctxMenu.addSeparator();
 
@@ -311,7 +311,7 @@ void DownloadsWidget::handleDownloadsMenu(const QPoint &pos)
         if (menuCount > 0)
             ctxMenu.addSeparator();
 
-        ctxMenu.addAction("Delete file", this, &DownloadsWidget::actionDelete);
+        ctxMenu.addAction(tr("Delete file"), this, &DownloadsWidget::actionDelete);
     }
     else {
         if (download->State == DOWNLOAD_STATE_RUNNING) {
@@ -339,7 +339,7 @@ void DownloadsWidget::actionSync()
     bool ok = false;
     bool result = HttpReqGetOTP("download", fileId, *adaptixWidget->GetProfile(), &message, &ok);
     if (!result) {
-        MessageError("Response timeout");
+        MessageError(tr("Response timeout"));
         return;
     }
     if (!ok) {
@@ -353,7 +353,7 @@ void DownloadsWidget::actionSync()
     if (adaptixWidget && adaptixWidget->GetProfile())
         baseDir = QDir(adaptixWidget->GetProfile()->GetProjectDir()).filePath(fileName);
 
-    NonBlockingDialogs::getSaveFileName(this, "Save File", baseDir, "All Files (*.*)",
+    NonBlockingDialogs::getSaveFileName(this, tr("Save File"), baseDir, tr("All Files (*.*)"),
         [this, otp](const QString& savedPath) {
             if (savedPath.isEmpty())
                 return;
@@ -378,7 +378,7 @@ void DownloadsWidget::actionSyncCurl()
     bool ok = false;
     bool result = HttpReqGetOTP("download", fileId, *adaptixWidget->GetProfile(), &message, &ok);
     if (!result) {
-        MessageError("Response timeout");
+        MessageError(tr("Response timeout"));
         return;
     }
     if (!ok) {
@@ -392,8 +392,8 @@ void DownloadsWidget::actionSyncCurl()
     QString command = QString("curl -k '%1?otp=%2' -o %3").arg(sUrl).arg(otp).arg(fileName);
 
     QInputDialog inputDialog;
-    inputDialog.setWindowTitle("Sync file as curl");
-    inputDialog.setLabelText("Curl command:");
+    inputDialog.setWindowTitle(tr("Sync file as curl"));
+    inputDialog.setLabelText(tr("Curl command:"));
     inputDialog.setTextEchoMode(QLineEdit::Normal);
     inputDialog.setTextValue(command);
     inputDialog.setFixedSize(700, 60);
@@ -414,7 +414,7 @@ void DownloadsWidget::actionSyncWget()
     bool ok = false;
     bool result = HttpReqGetOTP("download", fileId, *adaptixWidget->GetProfile(), &message, &ok);
     if (!result) {
-        MessageError("Response timeout");
+        MessageError(tr("Response timeout"));
         return;
     }
     if (!ok) {
@@ -428,8 +428,8 @@ void DownloadsWidget::actionSyncWget()
     QString command = QString("wget --no-check-certificate '%1?otp=%2' -O %3").arg(sUrl).arg(otp).arg(fileName);
 
     QInputDialog inputDialog;
-    inputDialog.setWindowTitle("Sync file as wget");
-    inputDialog.setLabelText("Wget command:");
+    inputDialog.setWindowTitle(tr("Sync file as wget"));
+    inputDialog.setLabelText(tr("Wget command:"));
     inputDialog.setTextEchoMode(QLineEdit::Normal);
     inputDialog.setTextValue(command);
     inputDialog.setFixedSize(700, 60);
@@ -458,6 +458,6 @@ void DownloadsWidget::actionDelete()
 
     HttpReqDownloadDelete(files, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Response timeout" : message);
+            MessageError(message.isEmpty() ? DownloadsWidget::tr("Response timeout") : message);
     });
 }

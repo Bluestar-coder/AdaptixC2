@@ -12,13 +12,22 @@
 #include <MainAdaptix.h>
 
 #include <QFontInfo>
+#include <QLibraryInfo>
+#include <QLocale>
+#include <QTranslator>
 #include <kddockwidgets/Config.h>
 #include <oclero/qlementine.hpp>
+
+QString MainAdaptix::NormalizeLanguage(const QString& language)
+{
+    return language.startsWith("zh", Qt::CaseInsensitive) ? "zh_CN" : "en";
+}
 
 MainAdaptix::MainAdaptix()
 {
     storage  = new Storage();
     settings = new Settings(this);
+    InstallLanguage(settings->data.Language);
 
     ConsoleThemeManager::instance().loadTheme(settings->data.ConsoleTheme);
 
@@ -32,9 +41,63 @@ MainAdaptix::MainAdaptix()
 
 MainAdaptix::~MainAdaptix()
 {
+    if (qApp) {
+        if (appTranslator)
+            qApp->removeTranslator(appTranslator);
+        if (qtTranslator)
+            qApp->removeTranslator(qtTranslator);
+    }
+
+    delete appTranslator;
+    delete qtTranslator;
     delete storage;
     delete mainUI;
     delete extender;
+}
+
+void MainAdaptix::InstallLanguage(const QString& language)
+{
+    const QString normalizedLanguage = NormalizeLanguage(language);
+
+    if (qApp) {
+        if (appTranslator) {
+            qApp->removeTranslator(appTranslator);
+            delete appTranslator;
+            appTranslator = nullptr;
+        }
+
+        if (qtTranslator) {
+            qApp->removeTranslator(qtTranslator);
+            delete qtTranslator;
+            qtTranslator = nullptr;
+        }
+    }
+
+    settings->data.Language = normalizedLanguage;
+
+    const QLocale locale = normalizedLanguage == "zh_CN"
+        ? QLocale(QLocale::Chinese, QLocale::China)
+        : QLocale(QLocale::English, QLocale::UnitedStates);
+    QLocale::setDefault(locale);
+
+    if (!qApp || normalizedLanguage != "zh_CN")
+        return;
+
+    appTranslator = new QTranslator(this);
+    if (appTranslator->load(":/i18n/AdaptixClient_zh_CN.qm"))
+        qApp->installTranslator(appTranslator);
+    else {
+        delete appTranslator;
+        appTranslator = nullptr;
+    }
+
+    qtTranslator = new QTranslator(this);
+    if (qtTranslator->load("qtbase_zh_CN", QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
+        qApp->installTranslator(qtTranslator);
+    else {
+        delete qtTranslator;
+        qtTranslator = nullptr;
+    }
 }
 
 void MainAdaptix::Start() const
@@ -69,7 +132,7 @@ void MainAdaptix::Start() const
         loop.exec();
 
         if (!timeoutTimer.isActive()) {
-            MessageError("Server is unreachable");
+            MessageError(tr("Server is unreachable"));
             if (ChannelThread->isRunning()) {
                 ChannelThread->quit();
                 ChannelThread->wait();
@@ -143,7 +206,7 @@ void MainAdaptix::NewProject() const
         loop.exec();
 
         if (!timeoutTimer.isActive()) {
-            MessageError("Server is unreachable");
+            MessageError(tr("Server is unreachable"));
             if (ChannelThread->isRunning()) {
                 ChannelThread->quit();
                 ChannelThread->wait();
@@ -188,7 +251,7 @@ AuthProfile* MainAdaptix::Login()
 
         result = HttpReqLogin( authProfile );
         if (!result)
-            MessageError("Login failure");
+            MessageError(tr("Login failure"));
 
     } while( !result );
 

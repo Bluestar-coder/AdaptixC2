@@ -194,6 +194,7 @@ class AxContainerWrapper;
 
 typedef struct SettingsData {
     QString MainTheme;
+    QString Language;
     QString FontFamily;
     int     FontSize;
     QString GraphVersion;

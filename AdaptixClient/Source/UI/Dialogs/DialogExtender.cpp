@@ -6,6 +6,27 @@
 #include <Client/AuthProfile.h>
 #include <UI/MainUI.h>
 #include <MainAdaptix.h>
+#include <QCoreApplication>
+
+namespace {
+
+QString extensionStatusText(const ExtensionFile& extenderItem)
+{
+    if (extenderItem.Enabled)
+        return QCoreApplication::translate("DialogExtender", "Enable");
+    if (extenderItem.Message.isEmpty())
+        return QCoreApplication::translate("DialogExtender", "Disable");
+    return QCoreApplication::translate("DialogExtender", "Failed");
+}
+
+QString serverScriptStatusText(const bool enabled)
+{
+    return enabled
+        ? QCoreApplication::translate("DialogExtender", "Enable")
+        : QCoreApplication::translate("DialogExtender", "Disable");
+}
+
+}
 
 DialogExtender::DialogExtender(Extender* e)
 {
@@ -58,17 +79,17 @@ static QTableView* createScriptTable(QWidget* parent, QStandardItemModel* model,
 
 void DialogExtender::createUI()
 {
-    this->setWindowTitle("AxScript manager");
+    this->setWindowTitle(tr("AxScript manager"));
     this->resize(1200, 700);
     this->setProperty("Main", "base");
 
     /// Local Scripts
     tableModel = new QStandardItemModel(this);
     tableView = createScriptTable(this, tableModel, 4);
-    tableModel->setHorizontalHeaderItem(0, new QStandardItem("Name"));
-    tableModel->setHorizontalHeaderItem(1, new QStandardItem("Path"));
-    tableModel->setHorizontalHeaderItem(2, new QStandardItem("Status"));
-    tableModel->setHorizontalHeaderItem(3, new QStandardItem("Description"));
+    tableModel->setHorizontalHeaderItem(0, new QStandardItem(tr("Name")));
+    tableModel->setHorizontalHeaderItem(1, new QStandardItem(tr("Path")));
+    tableModel->setHorizontalHeaderItem(2, new QStandardItem(tr("Status")));
+    tableModel->setHorizontalHeaderItem(3, new QStandardItem(tr("Description")));
     tableView->hideColumn(3);
 
     textComment = new QTextEdit(this);
@@ -89,9 +110,9 @@ void DialogExtender::createUI()
 
     serverTableModel = new QStandardItemModel(serverTab);
     serverTableWidget = createScriptTable(serverTab, serverTableModel, 3);
-    serverTableModel->setHorizontalHeaderItem(0, new QStandardItem("Name"));
-    serverTableModel->setHorizontalHeaderItem(1, new QStandardItem("Status"));
-    serverTableModel->setHorizontalHeaderItem(2, new QStandardItem("Description"));
+    serverTableModel->setHorizontalHeaderItem(0, new QStandardItem(tr("Name")));
+    serverTableModel->setHorizontalHeaderItem(1, new QStandardItem(tr("Status")));
+    serverTableModel->setHorizontalHeaderItem(2, new QStandardItem(tr("Description")));
     serverTableWidget->hideColumn(2);
 
     serverTextComment = new QTextEdit(serverTab);
@@ -111,13 +132,13 @@ void DialogExtender::createUI()
     serverLayout->addWidget(serverSplitter, 1);
 
     tabWidget = new QTabWidget(this);
-    tabWidget->addTab(splitter, "Local Scripts");
-    tabWidget->addTab(serverTab, "Server Scripts");
+    tabWidget->addTab(splitter, tr("Local Scripts"));
+    tabWidget->addTab(serverTab, tr("Server Scripts"));
 
     spacer1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
     spacer2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-    buttonClose = new QPushButton("Close", this);
+    buttonClose = new QPushButton(tr("Close"), this);
     buttonClose->setFixedWidth(180);
 
     layout = new QGridLayout(this);
@@ -144,16 +165,16 @@ void DialogExtender::AddExtenderItem(const ExtensionFile &extenderItem) const
     item_Status->setFlags( item_Status->flags() & ~Qt::ItemIsEditable );
     item_Status->setTextAlignment( Qt::AlignCenter );
     if ( extenderItem.Enabled ) {
-        item_Status->setText("Enable");
+        item_Status->setText(extensionStatusText(extenderItem));
         item_Status->setForeground(QColor(COLOR_NeonGreen));
     }
     else {
         if (extenderItem.Message.isEmpty()) {
-            item_Status->setText("Disable");
+            item_Status->setText(extensionStatusText(extenderItem));
             item_Status->setForeground(QColor(COLOR_BrightOrange));
         }
         else {
-            item_Status->setText("Failed");
+            item_Status->setText(extensionStatusText(extenderItem));
             item_Status->setForeground(QColor(COLOR_ChiliPepper));
         }
     }
@@ -184,16 +205,16 @@ void DialogExtender::UpdateExtenderItem(const ExtensionFile &extenderItem) const
             tableModel->item(row, 3)->setText(extenderItem.Description);
 
             if ( extenderItem.Enabled ) {
-                tableModel->item(row, 2)->setText("Enable");
+                tableModel->item(row, 2)->setText(extensionStatusText(extenderItem));
                 tableModel->item(row, 2)->setForeground(QColor(COLOR_NeonGreen));
             }
             else {
                 if (extenderItem.Message.isEmpty()) {
-                    tableModel->item(row, 2)->setText("Disable");
+                    tableModel->item(row, 2)->setText(extensionStatusText(extenderItem));
                     tableModel->item(row, 2)->setForeground(QColor(COLOR_BrightOrange));
                 }
                 else {
-                    tableModel->item(row, 2)->setText("Failed");
+                    tableModel->item(row, 2)->setText(extensionStatusText(extenderItem));
                     tableModel->item(row, 2)->setForeground(QColor(COLOR_ChiliPepper));
                 }
             }
@@ -219,13 +240,13 @@ void DialogExtender::handleMenu(const QPoint &pos ) const
 {
     QMenu menu = QMenu();
 
-    menu.addAction("Load new", this, &DialogExtender::onActionLoad );
-    menu.addAction("Reload",   this, &DialogExtender::onActionReload );
+    menu.addAction(tr("Load new"), this, &DialogExtender::onActionLoad );
+    menu.addAction(tr("Reload"),   this, &DialogExtender::onActionReload );
     menu.addSeparator();
-    menu.addAction("Enable",  this, &DialogExtender::onActionEnable );
-    menu.addAction("Disable", this, &DialogExtender::onActionDisable );
+    menu.addAction(tr("Enable"),  this, &DialogExtender::onActionEnable );
+    menu.addAction(tr("Disable"), this, &DialogExtender::onActionDisable );
     menu.addSeparator();
-    menu.addAction("Remove", this, &DialogExtender::onActionRemove );
+    menu.addAction(tr("Remove"), this, &DialogExtender::onActionRemove );
 
     QPoint globalPos = tableView->mapToGlobal(pos);
     menu.exec(globalPos);
@@ -239,7 +260,7 @@ void DialogExtender::onActionLoad() const
             baseDir = profile->GetProjectDir();
     }
 
-    NonBlockingDialogs::getOpenFileName(const_cast<DialogExtender*>(this), "Load Script", baseDir, "AxScript Files (*.axs)",
+    NonBlockingDialogs::getOpenFileName(const_cast<DialogExtender*>(this), tr("Load Script"), baseDir, tr("AxScript Files (*.axs)"),
         [this](const QString& filePath) {
             if (filePath.isEmpty())
                 return;
@@ -363,10 +384,10 @@ void DialogExtender::RefreshServerScripts()
         item_Status->setFlags(item_Status->flags() & ~Qt::ItemIsEditable);
         item_Status->setTextAlignment(Qt::AlignCenter);
         if (entry.enabled) {
-            item_Status->setText("Enable");
+            item_Status->setText(serverScriptStatusText(entry.enabled));
             item_Status->setForeground(QColor(COLOR_NeonGreen));
         } else {
-            item_Status->setText("Disable");
+            item_Status->setText(serverScriptStatusText(entry.enabled));
             item_Status->setForeground(QColor(COLOR_BrightOrange));
         }
 
@@ -388,8 +409,8 @@ void DialogExtender::RefreshServerScripts()
 void DialogExtender::handleServerMenu(const QPoint &pos)
 {
     QMenu menu;
-    menu.addAction("Enable",  this, &DialogExtender::onServerActionEnable);
-    menu.addAction("Disable", this, &DialogExtender::onServerActionDisable);
+    menu.addAction(tr("Enable"),  this, &DialogExtender::onServerActionEnable);
+    menu.addAction(tr("Disable"), this, &DialogExtender::onServerActionDisable);
 
     QPoint globalPos = serverTableWidget->mapToGlobal(pos);
     menu.exec(globalPos);

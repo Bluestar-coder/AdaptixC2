@@ -105,7 +105,7 @@ AdaptixWidget::AdaptixWidget(AuthProfile* authProfile, QThread* channelThread, W
 
     connect( ChannelWsWorker, &WebSocketWorker::websocket_closed, this, [this]() {
         if (this->sync && dialogSyncPacket) {
-            dialogSyncPacket->error("Connection lost during synchronization");
+            dialogSyncPacket->error(tr("Connection lost during synchronization"));
             this->sync = false;
             this->syncFinishReceived = false;
             this->pendingPackets.clear();
@@ -154,7 +154,7 @@ void AdaptixWidget::finalizeSyncIfReady()
         dialogSyncPacket->finish();
 
     if (dialogSyncPacket) {
-        dialogSyncPacket->setPhase("Applying UI updates...", true);
+        dialogSyncPacket->setPhase(tr("Applying UI updates..."), true);
         if (dialogSyncPacket->splashScreen)
             dialogSyncPacket->splashScreen->repaint();
     }
@@ -254,17 +254,17 @@ void AdaptixWidget::createUI()
     logsButton = new QPushButton(QIcon(":/icons/logs"), "", this );
     logsButton->setIconSize( QSize( 24,24 ));
     logsButton->setFixedSize(37, 28);
-    logsButton->setToolTip("Notifications");
+    logsButton->setToolTip(tr("Notifications"));
 
     listenersButton = new QPushButton( QIcon(":/icons/listeners"), "", this );
     listenersButton->setIconSize( QSize( 24,24 ));
     listenersButton->setFixedSize(37, 28);
-    listenersButton->setToolTip("Listeners & Sites");
+    listenersButton->setToolTip(tr("Listeners & Sites"));
 
     extDocksButton = new QPushButton(QIcon(":/icons/extension"), "", this);
     extDocksButton->setIconSize(QSize(24, 24));
     extDocksButton->setFixedSize(37, 28);
-    extDocksButton->setToolTip("Extensions Docks");
+    extDocksButton->setToolTip(tr("Extensions Docks"));
 
     line_1 = new QFrame(this);
     line_1->setFrameShape(QFrame::VLine);
@@ -273,17 +273,17 @@ void AdaptixWidget::createUI()
     sessionsButton = new QPushButton( QIcon(":/icons/format_list"), "", this );
     sessionsButton->setIconSize( QSize( 24,24 ));
     sessionsButton->setFixedSize(37, 28);
-    sessionsButton->setToolTip("Session table");
+    sessionsButton->setToolTip(tr("Session table"));
 
     graphButton = new QPushButton( QIcon(":/icons/graph"), "", this );
     graphButton->setIconSize( QSize( 24,24 ));
     graphButton->setFixedSize(37, 28);
-    graphButton->setToolTip("Session graph");
+    graphButton->setToolTip(tr("Session graph"));
 
     tasksButton = new QPushButton(QIcon(":/icons/job"), "", this );
     tasksButton->setIconSize(QSize(24, 24 ));
     tasksButton->setFixedSize(37, 28);
-    tasksButton->setToolTip("Jobs & Tasks");
+    tasksButton->setToolTip(tr("Jobs & Tasks"));
 
     line_2 = new QFrame(this);
     line_2->setFrameShape(QFrame::VLine);
@@ -292,12 +292,12 @@ void AdaptixWidget::createUI()
     chatButton = new QPushButton(QIcon(":/icons/chat"), "", this );
     chatButton->setIconSize( QSize( 24,24 ));
     chatButton->setFixedSize(37, 28);
-    chatButton->setToolTip("Chat");
+    chatButton->setToolTip(tr("Chat"));
 
     tunnelButton = new QPushButton( QIcon(":/icons/vpn"), "", this );
     tunnelButton->setIconSize( QSize( 24,24 ));
     tunnelButton->setFixedSize(37, 28);
-    tunnelButton->setToolTip("Tunnels table");
+    tunnelButton->setToolTip(tr("Tunnels table"));
 
     line_3 = new QFrame(this);
     line_3->setFrameShape(QFrame::VLine);
@@ -306,27 +306,27 @@ void AdaptixWidget::createUI()
     downloadsButton = new QPushButton( QIcon(":/icons/downloads"), "", this );
     downloadsButton->setIconSize( QSize( 24,24 ));
     downloadsButton->setFixedSize(37, 28);
-    downloadsButton->setToolTip("Downloads");
+    downloadsButton->setToolTip(tr("Downloads"));
 
     targetsButton = new QPushButton( QIcon(":/icons/devices"), "", this );
     targetsButton->setIconSize( QSize( 24,24 ));
     targetsButton->setFixedSize(37, 28);
-    targetsButton->setToolTip("Targets table");
+    targetsButton->setToolTip(tr("Targets table"));
 
     credsButton = new QPushButton( QIcon(":/icons/key"), "", this );
     credsButton->setIconSize( QSize( 24,24 ));
     credsButton->setFixedSize(37, 28);
-    credsButton->setToolTip("Credentials");
+    credsButton->setToolTip(tr("Credentials"));
 
     screensButton = new QPushButton( QIcon(":/icons/picture"), "", this );
     screensButton->setIconSize( QSize( 24,24 ));
     screensButton->setFixedSize(37, 28);
-    screensButton->setToolTip("Screens");
+    screensButton->setToolTip(tr("Screens"));
 
     keysButton = new QPushButton( QIcon(":/icons/keyboard"), "", this );
     keysButton->setIconSize( QSize( 24,24 ));
     keysButton->setFixedSize(37, 28);
-    keysButton->setToolTip("Keystrokes");
+    keysButton->setToolTip(tr("Keystrokes"));
 
     line_4 = new QFrame(this);
     line_4->setFrameShape(QFrame::VLine);
@@ -335,14 +335,14 @@ void AdaptixWidget::createUI()
     reconnectButton = new QPushButton(QIcon(":/icons/link"), "");
     reconnectButton->setIconSize(QSize(24,24));
     reconnectButton->setFixedSize(37, 28);
-    reconnectButton->setToolTip("Reconnect to C2");
+    reconnectButton->setToolTip(tr("Reconnect to C2"));
     QIcon onReconnectButton = RecolorIcon(reconnectButton->icon(), COLOR_NeonGreen);
     reconnectButton->setIcon(onReconnectButton);
 
     extDocksListWidget = new QListWidget();
     extDocksListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    extDocksEmptyLabel = new QLabel("No loaded extenders docks");
+    extDocksEmptyLabel = new QLabel(tr("No loaded extenders docks"));
     extDocksEmptyLabel->setAlignment(Qt::AlignCenter);
 
     auto extDocksLayout = new QVBoxLayout();
@@ -460,13 +460,13 @@ bool AdaptixWidget::AddExtension(ExtensionFile* ext)
 {
     if (ScriptManager->ScriptList().contains(ext->FilePath)) {
         ext->Enabled = false;
-        ext->Message = "Script already loaded";
+        ext->Message = tr("Script already loaded");
         return false;
     }
 
     if( !synchronized ) {
         ext->Enabled = false;
-        ext->Message = "C2 not synchronized";
+        ext->Message = tr("C2 not synchronized");
         return false;
     }
 
@@ -1185,7 +1185,7 @@ void AdaptixWidget::ShowTunnelCreator(const QString &AgentId, const bool socks4,
                         tunnelEndpoint->Stop();
                         delete tunnelEndpoint;
                     }
-                    MessageSuccess("Tunnel " + tunnelId + " started");
+                    MessageSuccess(tr("Tunnel %1 started").arg(tunnelId));
                 }
                 delete dialogTunnel;
             });
@@ -1286,7 +1286,7 @@ void AdaptixWidget::OnReconnect()
 
             QMetaObject::invokeMethod(this, [=, this]() {
                 if (!result) {
-                    MessageError("Login failure");
+                    MessageError(tr("Login failure"));
                 }
 
                 workerThread->quit();
@@ -1308,7 +1308,7 @@ void AdaptixWidget::OnReconnect()
 
             QMetaObject::invokeMethod(this, [=, this]() {
                 if (!result) {
-                    MessageError("Login failure");
+                    MessageError(tr("Login failure"));
                     if (dialogSyncPacket && dialogSyncPacket->splashScreen)
                         dialogSyncPacket->splashScreen->close();
                 } else {

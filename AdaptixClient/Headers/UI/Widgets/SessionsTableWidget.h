@@ -325,11 +325,11 @@ public:
                         uint endM   = ( d.WorkingTime >>  0 ) % 64;
 
                         QChar c = QLatin1Char('0');
-                        WorkAndKill = QString("Work time: %1:%2 - %3:%4\n").arg(startH, 2, 10, c).arg(startM, 2, 10, c).arg(endH, 2, 10, c).arg(endM, 2, 10, c);
+                        WorkAndKill = QString(tr("Work time: %1:%2 - %3:%4\n")).arg(startH, 2, 10, c).arg(startM, 2, 10, c).arg(endH, 2, 10, c).arg(endM, 2, 10, c);
                     }
                     if (d.KillDate) {
                         QDateTime dateTime = QDateTime::fromSecsSinceEpoch(d.KillDate);
-                        WorkAndKill += QString("Kill date: %1").arg(dateTime.toString("dd.MM.yyyy hh:mm:ss"));
+                        WorkAndKill += QString(tr("Kill date: %1")).arg(dateTime.toString("dd.MM.yyyy hh:mm:ss"));
                     }
                 }
                 return WorkAndKill;
@@ -343,13 +343,25 @@ public:
         if (role != Qt::DisplayRole || o != Qt::Horizontal)
             return {};
 
-        static QStringList headers = {
-            "Agent Id", "Type", "External", "Listener", "Internal",
-            "Domain", "Computer", "User", "OS", "Process",
-            "PID", "TID", "Tags", "Created", "Last", "Sleep"
-        };
-
-        return headers.value(section);
+        switch (section) {
+            case SC_AgentID:   return tr("Agent Id");
+            case SC_AgentType: return tr("Type");
+            case SC_External:  return tr("External");
+            case SC_Listener:  return tr("Listener");
+            case SC_Internal:  return tr("Internal");
+            case SC_Domain:    return tr("Domain");
+            case SC_Computer:  return tr("Computer");
+            case SC_User:      return tr("User");
+            case SC_Os:        return tr("OS");
+            case SC_Process:   return tr("Process");
+            case SC_Pid:       return tr("PID");
+            case SC_Tid:       return tr("TID");
+            case SC_Tags:      return tr("Tags");
+            case SC_Created:   return tr("Created");
+            case SC_Last:      return tr("Last");
+            case SC_Sleep:     return tr("Sleep");
+            default:           return {};
+        }
     }
 
     void add(const QString &agentId) {

@@ -2,6 +2,18 @@
 #include <Client/Settings.h>
 #include <Client/Storage.h>
 #include <MainAdaptix.h>
+#include <QLocale>
+
+QString Settings::DetectDefaultLanguage()
+{
+    const QStringList languages = QLocale::system().uiLanguages();
+    for (const QString& language : languages) {
+        if (language.startsWith("zh", Qt::CaseInsensitive))
+            return "zh_CN";
+    }
+
+    return "en";
+}
 
 Settings::Settings(MainAdaptix* m)
 {
@@ -29,6 +41,7 @@ DialogSettings* Settings::getDialogSettings()
 void Settings::SetDefault()
 {
     this->data.MainTheme    = "Adaptix_Dark";
+    this->data.Language     = DetectDefaultLanguage();
     this->data.FontFamily   = "Adaptix - JetBrains Mono";
     this->data.FontSize     = 10;
     this->data.GraphVersion = "Version 1";

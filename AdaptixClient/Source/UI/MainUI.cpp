@@ -22,36 +22,36 @@
 
 MainUI::MainUI()
 {
-    this->setWindowTitle( FRAMEWORK_VERSION );
+    this->setWindowTitle(tr("Adaptix Framework %1").arg(SMALL_VERSION));
     this->setProperty("Main", "base");
 
-    auto newProjectAction = new QAction("New Project", this);
+    auto newProjectAction = new QAction(tr("New Project"), this);
     connect(newProjectAction, &QAction::triggered, this, &MainUI::onNewProject);
-    auto closeProjectAction = new QAction("Close Project", this);
+    auto closeProjectAction = new QAction(tr("Close Project"), this);
     connect(closeProjectAction, &QAction::triggered, this, &MainUI::onCloseProject);
 
-    auto projectSettingsAction = new QAction("Subscriptions", this);
+    auto projectSettingsAction = new QAction(tr("Subscriptions"), this);
     connect(projectSettingsAction, &QAction::triggered, this, &MainUI::onProjectSubscriptions);
 
-    menuProject = new QMenu("Projects", this);
+    menuProject = new QMenu(tr("Projects"), this);
     menuProject->addAction(newProjectAction);
     menuProject->addAction(closeProjectAction);
     menuProject->addSeparator();
     menuProject->addAction(projectSettingsAction);
 
-    auto axConsoleAction = new QAction("AxScript console ", this);
+    auto axConsoleAction = new QAction(tr("AxScript console"), this);
     connect(axConsoleAction, &QAction::triggered, this, &MainUI::onAxScriptConsole);
-    auto scriptManagerAction = new QAction("Script manager", this);
+    auto scriptManagerAction = new QAction(tr("Script manager"), this);
     connect(scriptManagerAction, &QAction::triggered, this, &MainUI::onScriptManager);
 
-    menuExtensions = new QMenu("Extensions", this);
+    menuExtensions = new QMenu(tr("Extensions"), this);
     menuExtensions->addAction(axConsoleAction);
     menuExtensions->addAction(scriptManagerAction);
     extDocksSeparator = menuExtensions->addSeparator();
     extDocksSeparator->setVisible(false);
 
-    menuSettings = new QMenu("Settings", this);
-    auto settingsAction = new QAction("Open settings", this);
+    menuSettings = new QMenu(tr("Settings"), this);
+    auto settingsAction = new QAction(tr("Open settings"), this);
     connect(settingsAction, &QAction::triggered, this, &MainUI::onSettings);
     menuSettings->addAction(settingsAction);
 

@@ -315,6 +315,11 @@ void Storage::SelectSettingsMain(SettingsData* settingsData)
 
         if (json.contains("theme") && !json["theme"].toString().isEmpty())
             settingsData->MainTheme   = json["theme"].toString();
+        if (json.contains("language")) {
+            const QString language = json["language"].toString();
+            if (language == "en" || language == "zh_CN" || language.startsWith("zh", Qt::CaseInsensitive))
+                settingsData->Language = language.startsWith("zh", Qt::CaseInsensitive) ? "zh_CN" : "en";
+        }
         if (json.contains("fontFamily") && !json["fontFamily"].toString().isEmpty())
             settingsData->FontFamily  = json["fontFamily"].toString();
         if (json.contains("fontSize") && json["fontSize"].toInt() > 0)
@@ -328,6 +333,7 @@ void Storage::UpdateSettingsMain(const SettingsData &settingsData)
 {
     QJsonObject json;
     json["theme"]       = settingsData.MainTheme;
+    json["language"]    = settingsData.Language;
     json["fontFamily"]  = settingsData.FontFamily;
     json["fontSize"]    = settingsData.FontSize;
     json["consoleTime"] = settingsData.ConsoleTime;

@@ -7,9 +7,9 @@
 #include <Agent/Agent.h>
 #include <UI/Graph/GraphItem.h>
 
-REGISTER_DOCK_WIDGET(TunnelsWidget, "Tunnels", true)
+REGISTER_DOCK_WIDGET(TunnelsWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Tunnels"), true)
 
-TunnelsWidget::TunnelsWidget(AdaptixWidget* w) : DockTab("Tunnels", w->GetProfile()->GetProject(), ":/icons/vpn")
+TunnelsWidget::TunnelsWidget(AdaptixWidget* w) : DockTab(tr("Tunnels"), w->GetProfile()->GetProject(), ":/icons/vpn")
 {
     this->adaptixWidget = w;
 
@@ -52,12 +52,12 @@ void TunnelsWidget::createUI()
     searchWidget->setVisible(false);
 
     inputFilter = new QLineEdit(searchWidget);
-    inputFilter->setPlaceholderText("filter: (socks | forward) & ^(test)");
+    inputFilter->setPlaceholderText(tr("filter: (socks | forward) & ^(test)"));
     inputFilter->setMaximumWidth(300);
 
-    autoSearchCheck = new QCheckBox("auto", searchWidget);
+    autoSearchCheck = new QCheckBox(tr("auto"), searchWidget);
     autoSearchCheck->setChecked(true);
-    autoSearchCheck->setToolTip("Auto search on text change. If unchecked, press Enter to search.");
+    autoSearchCheck->setToolTip(tr("Auto search on text change. If unchecked, press Enter to search."));
 
     hideButton = new ClickableLabel("  x  ");
     hideButton->setCursor(Qt::PointingHandCursor);
@@ -217,8 +217,8 @@ void TunnelsWidget::handleTunnelsMenu(const QPoint &pos) const
 {
     QMenu tunnelsMenu = QMenu();
 
-    tunnelsMenu.addAction("Set info", this, &TunnelsWidget::actionSetInfo);
-    tunnelsMenu.addAction("Stop",     this, &TunnelsWidget::actionStopTunnel);
+    tunnelsMenu.addAction(tr("Set info"), this, &TunnelsWidget::actionSetInfo);
+    tunnelsMenu.addAction(tr("Stop"),     this, &TunnelsWidget::actionStopTunnel);
 
     QPoint globalPos = tableView->mapToGlobal(pos);
     tunnelsMenu.exec(globalPos);
@@ -238,11 +238,11 @@ void TunnelsWidget::actionSetInfo() const
     QString info     = tunnelsModel->data(tunnelsModel->index(sourceIndex.row(), TUC_Info),     Qt::DisplayRole).toString();
 
     bool inputOk;
-    QString newInfo = QInputDialog::getText(nullptr, "Set info", "Info:", QLineEdit::Normal, info, &inputOk);
+    QString newInfo = QInputDialog::getText(nullptr, tr("Set info"), tr("Info:"), QLineEdit::Normal, info, &inputOk);
     if (inputOk) {
         HttpReqTunnelSetInfoAsync(tunnelId, newInfo, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
             if (!success)
-                MessageError(message.isEmpty() ? "Response timeout" : message);
+                MessageError(message.isEmpty() ? TunnelsWidget::tr("Response timeout") : message);
         });
     }
 }
@@ -268,6 +268,6 @@ void TunnelsWidget::actionStopTunnel() const
 
     HttpReqTunnelStopAsync(tunnelId, *(adaptixWidget->GetProfile()), [](bool success, const QString& message, const QJsonObject&) {
         if (!success)
-            MessageError(message.isEmpty() ? "Response timeout" : message);
+            MessageError(message.isEmpty() ? TunnelsWidget::tr("Response timeout") : message);
     });
 }

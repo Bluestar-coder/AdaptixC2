@@ -7,6 +7,7 @@
 #include <Utils/TitleBarStyle.h>
 #include <QShowEvent>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <algorithm>
 #include <oclero/qlementine.hpp>
 
@@ -17,6 +18,7 @@ DialogSettings::DialogSettings(Settings* s)
     this->createUI();
 
     connect(themeCombo,         &QComboBox::currentTextChanged, buttonApply, [this](const QString &text){buttonApply->setEnabled(true);} );
+    connect(languageCombo,      &QComboBox::currentIndexChanged, buttonApply, [this](int){buttonApply->setEnabled(true);} );
     connect(fontFamilyCombo,    &QComboBox::currentTextChanged, buttonApply, [this](const QString &text){buttonApply->setEnabled(true);} );
     connect(fontSizeSpin,       &QSpinBox::valueChanged,        buttonApply, [this](int){buttonApply->setEnabled(true);} );
     connect(sessionsCoafSpin,   &QDoubleSpinBox::valueChanged,  buttonApply, [this](double){buttonApply->setEnabled(true);} );
@@ -78,20 +80,20 @@ DialogSettings::DialogSettings(Settings* s)
 
 void DialogSettings::createUI()
 {
-    this->setWindowTitle("Adaptix Settings");
+    this->setWindowTitle(tr("Adaptix Settings"));
     this->resize(600, 300);
     this->setProperty("Main", "base");
 
     mainSettingWidget = new QWidget(this);
     mainSettingLayout = new QGridLayout(mainSettingWidget);
 
-    themeLabel = new QLabel("Main theme: ", mainSettingWidget);
+    themeLabel = new QLabel(tr("Main theme:"), mainSettingWidget);
     themeCombo = new QComboBox(mainSettingWidget);
     refreshAppThemeCombo();
-    themeImportBtn = new QPushButton("Import", mainSettingWidget);
+    themeImportBtn = new QPushButton(tr("Import"), mainSettingWidget);
     themeImportBtn->setFixedWidth(80);
     connect(themeImportBtn, &QPushButton::clicked, this, [this]() {
-        QString filePath = QFileDialog::getOpenFileName(this, "Import Application Theme", QString(), "JSON files (*.json)");
+        QString filePath = QFileDialog::getOpenFileName(this, tr("Import Application Theme"), QString(), tr("JSON files (*.json)"));
         if (filePath.isEmpty()) return;
         if (importAppTheme(filePath)) {
             QString name = QFileInfo(filePath).baseName();
@@ -101,48 +103,53 @@ void DialogSettings::createUI()
         }
     });
 
-    fontSizeLabel = new QLabel("Font size: ", mainSettingWidget);
+    languageLabel = new QLabel(tr("Language:"), mainSettingWidget);
+    languageCombo = new QComboBox(mainSettingWidget);
+    languageCombo->addItem(tr("English"), "en");
+    languageCombo->addItem(tr("简体中文"), "zh_CN");
+
+    fontSizeLabel = new QLabel(tr("Font size:"), mainSettingWidget);
     fontSizeSpin  = new QSpinBox(mainSettingWidget);
     fontSizeSpin->setMinimum(7);
     fontSizeSpin->setMaximum(30);
 
-    fontFamilyLabel = new QLabel("Font family: ", mainSettingWidget);
+    fontFamilyLabel = new QLabel(tr("Font family:"), mainSettingWidget);
     fontFamilyCombo = new QComboBox(mainSettingWidget);
     fontFamilyCombo->addItem("Adaptix - JetBrains Mono");
     fontFamilyCombo->addItem("Adaptix - Hack");
     fontFamilyCombo->addItem("Qlementine - Inter");
     fontFamilyCombo->addItem("Qlementine - Roboto Mono");
 
-    graphLabel1 = new QLabel("Session Graph version:", mainSettingWidget);
+    graphLabel1 = new QLabel(tr("Session Graph version:"), mainSettingWidget);
     graphCombo1 = new QComboBox(mainSettingWidget);
-    graphCombo1->addItem("Version 1");
-    graphCombo1->addItem("Version 2");
-    graphCombo1->addItem("Version 3");
+    graphCombo1->addItem(tr("Version 1"), "Version 1");
+    graphCombo1->addItem(tr("Version 2"), "Version 2");
+    graphCombo1->addItem(tr("Version 3"), "Version 3");
 
-    terminalSizeLabel = new QLabel("RemoteTerminal buffer (lines):", mainSettingWidget);
+    terminalSizeLabel = new QLabel(tr("RemoteTerminal buffer (lines):"), mainSettingWidget);
     terminalSizeSpin  = new QSpinBox(mainSettingWidget);
     terminalSizeSpin->setMinimum(1);
     terminalSizeSpin->setMaximum(100000);
 
-    consoleGroup  = new QGroupBox("Agent Console", mainSettingWidget);
+    consoleGroup  = new QGroupBox(tr("Agent Console"), mainSettingWidget);
 
-    consoleSizeLabel = new QLabel("Buffer size (lines):", consoleGroup);
+    consoleSizeLabel = new QLabel(tr("Buffer size (lines):"), consoleGroup);
     consoleSizeSpin  = new QSpinBox(consoleGroup);
     consoleSizeSpin->setMinimum(10000);
     consoleSizeSpin->setMaximum(1000000);
 
-    consoleTimeCheckbox           = new QCheckBox("Print date and time", consoleGroup);
-    consoleNoWrapCheckbox         = new QCheckBox("No Wrap mode", consoleGroup);
-    consoleAutoScrollCheckbox     = new QCheckBox("Auto Scroll mode", consoleGroup);
-    consoleShowBackgroundCheckbox = new QCheckBox("Show background image", consoleGroup);
+    consoleTimeCheckbox           = new QCheckBox(tr("Print date and time"), consoleGroup);
+    consoleNoWrapCheckbox         = new QCheckBox(tr("No Wrap mode"), consoleGroup);
+    consoleAutoScrollCheckbox     = new QCheckBox(tr("Auto Scroll mode"), consoleGroup);
+    consoleShowBackgroundCheckbox = new QCheckBox(tr("Show background image"), consoleGroup);
 
-    consoleThemeLabel = new QLabel("Console theme:", consoleGroup);
+    consoleThemeLabel = new QLabel(tr("Console theme:"), consoleGroup);
     consoleThemeCombo = new QComboBox(consoleGroup);
     refreshConsoleThemeCombo();
-    consoleThemeImportBtn = new QPushButton("Import", consoleGroup);
+    consoleThemeImportBtn = new QPushButton(tr("Import"), consoleGroup);
     consoleThemeImportBtn->setFixedWidth(80);
     connect(consoleThemeImportBtn, &QPushButton::clicked, this, [this]() {
-        QString filePath = QFileDialog::getOpenFileName(this, "Import Console Theme", QString(), "JSON files (*.json)");
+        QString filePath = QFileDialog::getOpenFileName(this, tr("Import Console Theme"), QString(), tr("JSON files (*.json)"));
         if (filePath.isEmpty()) return;
         if (ConsoleThemeManager::instance().importTheme(filePath)) {
             QString name = QFileInfo(filePath).baseName();
@@ -167,26 +174,28 @@ void DialogSettings::createUI()
     mainSettingLayout->addWidget(themeLabel,        0, 0, 1, 1);
     mainSettingLayout->addWidget(themeCombo,        0, 1, 1, 1);
     mainSettingLayout->addWidget(themeImportBtn,    0, 2, 1, 1);
-    mainSettingLayout->addWidget(fontFamilyLabel,   1, 0, 1, 1);
-    mainSettingLayout->addWidget(fontFamilyCombo,   1, 1, 1, 2);
-    mainSettingLayout->addWidget(fontSizeLabel,     2, 0, 1, 1);
-    mainSettingLayout->addWidget(fontSizeSpin,      2, 1, 1, 2);
-    mainSettingLayout->addWidget(graphLabel1,       3, 0, 1, 1);
-    mainSettingLayout->addWidget(graphCombo1,       3, 1, 1, 2);
-    mainSettingLayout->addWidget(terminalSizeLabel, 4, 0, 1, 1);
-    mainSettingLayout->addWidget(terminalSizeSpin,  4, 1, 1, 2);
-    mainSettingLayout->addWidget(consoleGroup,      5, 0, 1, 3);
+    mainSettingLayout->addWidget(languageLabel,     1, 0, 1, 1);
+    mainSettingLayout->addWidget(languageCombo,     1, 1, 1, 2);
+    mainSettingLayout->addWidget(fontFamilyLabel,   2, 0, 1, 1);
+    mainSettingLayout->addWidget(fontFamilyCombo,   2, 1, 1, 2);
+    mainSettingLayout->addWidget(fontSizeLabel,     3, 0, 1, 1);
+    mainSettingLayout->addWidget(fontSizeSpin,      3, 1, 1, 2);
+    mainSettingLayout->addWidget(graphLabel1,       4, 0, 1, 1);
+    mainSettingLayout->addWidget(graphCombo1,       4, 1, 1, 2);
+    mainSettingLayout->addWidget(terminalSizeLabel, 5, 0, 1, 1);
+    mainSettingLayout->addWidget(terminalSizeSpin,  5, 1, 1, 2);
+    mainSettingLayout->addWidget(consoleGroup,      6, 0, 1, 3);
 
     mainSettingWidget->setLayout(mainSettingLayout);
 
     sessionsWidget = new QWidget(this);
     sessionsLayout = new QGridLayout(sessionsWidget);
-    sessionsGroup  = new QGroupBox("Columns", sessionsWidget);
+    sessionsGroup  = new QGroupBox(tr("Columns"), sessionsWidget);
 
     QStringList sessionsCheckboxLabels = {
-        "Agent ID", "Agent Type", "External", "Listener", "Internal",
-        "Domain", "Computer", "User", "OS", "Process",
-        "PID", "TID", "Tags", "Created", "Last", "Sleep"
+        tr("Agent ID"), tr("Agent Type"), tr("External"), tr("Listener"), tr("Internal"),
+        tr("Domain"), tr("Computer"), tr("User"), tr("OS"), tr("Process"),
+        tr("PID"), tr("TID"), tr("Tags"), tr("Created"), tr("Last"), tr("Sleep")
     };
 
     for (int i = 0; i < sessionsCheckCount; ++i)
@@ -211,18 +220,18 @@ void DialogSettings::createUI()
     sessionsGroupLayout->addWidget(sessionsCheck[15], 7, 1, 1, 1);
     sessionsGroup->setLayout(sessionsGroupLayout);
 
-    sessionsHealthCheck = new QCheckBox("Check Health", sessionsWidget);
+    sessionsHealthCheck = new QCheckBox(tr("Check Health"), sessionsWidget);
 
     QSpacerItem* horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
     sessionsLabel1 = new QLabel(sessionsWidget);
-    sessionsLabel1->setText("Sleeptime *");
+    sessionsLabel1->setText(tr("Sleeptime *"));
 
     sessionsLabel2 = new QLabel(sessionsWidget);
     sessionsLabel2->setText("+");
 
     sessionsLabel3 = new QLabel(sessionsWidget);
-    sessionsLabel3->setText("sec");
+    sessionsLabel3->setText(tr("sec"));
 
     sessionsCoafSpin = new QDoubleSpinBox(sessionsWidget);
     sessionsCoafSpin->setMinimum(1.0);
@@ -247,12 +256,12 @@ void DialogSettings::createUI()
 
     tasksWidget = new QWidget(this);
     tasksLayout = new QGridLayout(tasksWidget);
-    tasksGroup  = new QGroupBox("Columns", tasksWidget);
+    tasksGroup  = new QGroupBox(tr("Columns"), tasksWidget);
 
     QStringList tasksCheckboxLabels = {
-        "Task ID", "Task Type", "Agent ID", "Client", "User",
-        "Computer", "Start Time", "Finish Time", "Commandline",
-        "Result", "Output"
+        tr("Task ID"), tr("Task Type"), tr("Agent ID"), tr("Client"), tr("User"),
+        tr("Computer"), tr("Start Time"), tr("Finish Time"), tr("Commandline"),
+        tr("Result"), tr("Output")
     };
 
     for (int i = 0; i < 11; ++i)
@@ -276,15 +285,15 @@ void DialogSettings::createUI()
     tasksWidget->setLayout(tasksLayout);
 
     tabblinkWidget = new QWidget(this);
-    tabblinkEnabledCheckbox = new QCheckBox("Enable tab blink", tabblinkWidget);
+    tabblinkEnabledCheckbox = new QCheckBox(tr("Enable tab blink"), tabblinkWidget);
 
-    tabblinkGroup = new QGroupBox("Blinking tabs", tabblinkWidget);
+    tabblinkGroup = new QGroupBox(tr("Blinking tabs"), tabblinkWidget);
     tabblinkGroupLayout = new QGridLayout(tabblinkGroup);
     tabblinkGroupLayout->setContentsMargins(15, 15, 15, 15);
     tabblinkGroupLayout->setHorizontalSpacing(40);
     tabblinkGroupLayout->setVerticalSpacing(12);
 
-    auto widgetsList = WidgetRegistry::instance().widgets();
+    auto widgetsList = WidgetRegistry::instance().translatedWidgets();
     std::ranges::sort(widgetsList, [](const auto& a, const auto& b) { return a.displayName < b.displayName; });
 
     // Dynamically create checkboxes from registry
@@ -310,10 +319,10 @@ void DialogSettings::createUI()
     listSettings = new QListWidget(this);
     listSettings->setFixedWidth(150);
     listSettings->setSpacing(3);
-    listSettings->addItem("Main settings");
-    listSettings->addItem("Sessions table");
-    listSettings->addItem("Tasks table");
-    listSettings->addItem("Blinking tabs");
+    listSettings->addItem(tr("Main settings"));
+    listSettings->addItem(tr("Sessions table"));
+    listSettings->addItem(tr("Tasks table"));
+    listSettings->addItem(tr("Blinking tabs"));
     listSettings->setCurrentRow(0);
 
     labelHeader = new QLabel(this);
@@ -322,7 +331,7 @@ void DialogSettings::createUI()
     headerFont.setBold(true);
     labelHeader->setFont(headerFont);
     labelHeader->setContentsMargins(0, 0, 0, 10);
-    labelHeader->setText("Main settings");
+    labelHeader->setText(tr("Main settings"));
 
     lineFrame = new QFrame(this);
     lineFrame->setFrameShape(QFrame::HLine);
@@ -334,9 +343,9 @@ void DialogSettings::createUI()
     headerLayout->setSpacing(0);
 
     hSpacer     = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    buttonClose = new QPushButton("Close", this);
+    buttonClose = new QPushButton(tr("Close"), this);
 
-    buttonApply = new QPushButton("Apply ", this);
+    buttonApply = new QPushButton(tr("Apply"), this);
     buttonApply->setDefault(true);
     buttonApply->setEnabled(false);
 
@@ -396,6 +405,8 @@ void DialogSettings::onApply() const
     buttonApply->setEnabled(false);
 
     bool themeChanged = settings->data.MainTheme != themeCombo->currentText();
+    const QString language = languageCombo->currentData().toString();
+    bool languageChanged = settings->data.Language != language;
     bool fontChanged  = settings->data.FontSize != fontSizeSpin->value() || settings->data.FontFamily != fontFamilyCombo->currentText();
 
     if(themeChanged) {
@@ -410,6 +421,9 @@ void DialogSettings::onApply() const
         TitleBarStyle::applyForTheme(settings->getMainAdaptix()->mainUI, settings->data.MainTheme);
     }
 
+    if (languageChanged)
+        settings->data.Language = language;
+
     if(fontChanged) {
         settings->data.FontSize   = fontSizeSpin->value();
         settings->data.FontFamily = fontFamilyCombo->currentText();
@@ -419,8 +433,8 @@ void DialogSettings::onApply() const
         settings->getMainAdaptix()->ApplyApplicationFont();
     }
 
-    if (settings->data.GraphVersion != graphCombo1->currentText()) {
-        settings->data.GraphVersion = graphCombo1->currentText();
+    if (settings->data.GraphVersion != graphCombo1->currentData().toString()) {
+        settings->data.GraphVersion = graphCombo1->currentData().toString();
         settings->getMainAdaptix()->mainUI->UpdateGraphIcons();
     }
 
@@ -467,6 +481,14 @@ void DialogSettings::onApply() const
         settings->data.BlinkWidgets[it.key()] = it.value()->isChecked();
 
     settings->SaveToDB();
+
+    if (languageChanged) {
+        QMessageBox::information(
+            const_cast<DialogSettings*>(this),
+            tr("Restart Required"),
+            tr("Language will change after restarting the client.")
+        );
+    }
 }
 
 void DialogSettings::onClose()
@@ -477,9 +499,14 @@ void DialogSettings::onClose()
 void DialogSettings::loadSettings()
 {
     themeCombo->setCurrentText(settings->data.MainTheme);
+    int languageIndex = languageCombo->findData(settings->data.Language);
+    if (languageIndex >= 0)
+        languageCombo->setCurrentIndex(languageIndex);
     fontFamilyCombo->setCurrentText(settings->data.FontFamily);
     fontSizeSpin->setValue(settings->data.FontSize);
-    graphCombo1->setCurrentText(settings->data.GraphVersion);
+    int graphIndex = graphCombo1->findData(settings->data.GraphVersion);
+    if (graphIndex >= 0)
+        graphCombo1->setCurrentIndex(graphIndex);
     terminalSizeSpin->setValue(settings->data.RemoteTerminalBufferSize);
 
     consoleSizeSpin->setValue(settings->data.ConsoleBufferSize);

@@ -32,6 +32,7 @@ find_package(Qt6
         WebSockets
         Sql
         Qml
+        LinguistTools
 )
 
 include_directories(
@@ -257,6 +258,25 @@ add_executable(AdaptixClient
         Source/Utils/NonBlockingDialogs.cpp
         Source/Utils/FontManager.cpp
         Source/Utils/TitleBarStyle.cpp
+)
+
+file(GLOB_RECURSE ADAPTIXCLIENT_TRANSLATION_SOURCES CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/Headers/*.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp"
+)
+
+set(ADAPTIXCLIENT_TS_FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/i18n/AdaptixClient_zh_CN.ts"
+)
+
+qt_add_translations(AdaptixClient
+        TS_FILES ${ADAPTIXCLIENT_TS_FILES}
+        SOURCES ${ADAPTIXCLIENT_TRANSLATION_SOURCES}
+        RESOURCE_PREFIX "/i18n"
+)
+
+add_custom_target(update_adaptixclient_translations
+        DEPENDS AdaptixClient_lupdate
 )
 
 target_compile_definitions(

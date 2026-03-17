@@ -7,9 +7,9 @@
 #include <Utils/Convert.h>
 #include <MainAdaptix.h>
 
-REGISTER_DOCK_WIDGET(LogsWidget, "Logs", true)
+REGISTER_DOCK_WIDGET(LogsWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Logs"), true)
 
-LogsWidget::LogsWidget(const AdaptixWidget* w) : DockTab("Logs", w->GetProfile()->GetProject(), ":/icons/logs")
+LogsWidget::LogsWidget(const AdaptixWidget* w) : DockTab(tr("Logs"), w->GetProfile()->GetProject(), ":/icons/logs")
 {
     this->createUI();
 
@@ -51,9 +51,9 @@ void LogsWidget::createUI()
     nextButton = new ClickableLabel(">");
     nextButton->setCursor( Qt::PointingHandCursor );
 
-    searchLabel    = new QLabel("0 of 0");
+    searchLabel    = new QLabel(tr("0 of 0"));
     searchLineEdit = new QLineEdit();
-    searchLineEdit->setPlaceholderText("Find");
+    searchLineEdit->setPlaceholderText(tr("Find"));
     searchLineEdit->setMaximumWidth(300);
 
     hideButton = new ClickableLabel("X");
@@ -149,7 +149,7 @@ void LogsWidget::findAndHighlightAll(const QString &pattern)
 void LogsWidget::highlightCurrent() const
 {
     if (allSelections.isEmpty()) {
-        searchLabel->setText("0 of 0");
+        searchLabel->setText(tr("0 of 0"));
         return;
     }
 
@@ -165,7 +165,7 @@ void LogsWidget::highlightCurrent() const
 
     logsConsoleTextEdit->setTextCursor(sels[currentIndex].cursor);
 
-    searchLabel->setText(QString("%1 of %2").arg(currentIndex + 1).arg(sels.size()));
+    searchLabel->setText(tr("%1 of %2").arg(currentIndex + 1).arg(sels.size()));
 }
 
 void LogsWidget::AddLogs(const int type, const qint64 time, const QString &message)
@@ -223,7 +223,7 @@ void LogsWidget::handleSearch()
     if ( pattern.isEmpty() && allSelections.size() ) {
         allSelections.clear();
         currentIndex = -1;
-        searchLabel->setText("0 of 0");
+        searchLabel->setText(tr("0 of 0"));
         logsConsoleTextEdit->setExtraSelections({});
         return;
     }
@@ -245,7 +245,7 @@ void LogsWidget::handleSearchBackward()
     if (pattern.isEmpty() && allSelections.size()) {
         allSelections.clear();
         currentIndex = -1;
-        searchLabel->setText("0 of 0");
+        searchLabel->setText(tr("0 of 0"));
         logsConsoleTextEdit->setExtraSelections({});
         return;
     }

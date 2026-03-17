@@ -4,6 +4,7 @@
 #include <QString>
 #include <QMap>
 #include <QList>
+#include <QCoreApplication>
 
 /**
  * @brief Registry for dock widgets with blink support.
@@ -30,6 +31,15 @@ public:
     }
 
     QList<WidgetInfo> widgets() const { return m_widgets.values(); }
+    QList<WidgetInfo> translatedWidgets() const {
+        QList<WidgetInfo> result;
+        for (const auto& widget : m_widgets) {
+            WidgetInfo translated = widget;
+            translated.displayName = QCoreApplication::translate("DockWidgetNames", widget.displayName.toUtf8().constData());
+            result.append(translated);
+        }
+        return result;
+    }
 
 private:
     WidgetRegistry() = default;

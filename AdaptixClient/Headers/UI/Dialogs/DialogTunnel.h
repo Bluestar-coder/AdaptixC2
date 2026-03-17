@@ -5,6 +5,7 @@
 
 class DialogTunnel : public QDialog
 {
+     Q_DECLARE_TR_FUNCTIONS(DialogTunnel)
      QGridLayout*    mainGridLayout       = nullptr;
      QLabel*         tunnelTypeLabel      = nullptr;
      QComboBox*      tunnelTypeCombo      = nullptr;

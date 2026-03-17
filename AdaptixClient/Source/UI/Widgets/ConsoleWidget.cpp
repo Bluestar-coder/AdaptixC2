@@ -10,9 +10,9 @@
 #include <Utils/FontManager.h>
 #include <MainAdaptix.h>
 
-REGISTER_DOCK_WIDGET(ConsoleWidget, "Agent Console", true)
+REGISTER_DOCK_WIDGET(ConsoleWidget, QT_TRANSLATE_NOOP("DockWidgetNames", "Agent Console"), true)
 
-ConsoleWidget::ConsoleWidget( AdaptixWidget* w, Agent* a, Commander* c) : DockTab(QString("Console [%1]").arg( a->data.Id ), w->GetProfile()->GetProject())
+ConsoleWidget::ConsoleWidget( AdaptixWidget* w, Agent* a, Commander* c) : DockTab(tr("Console [%1]").arg( a->data.Id ), w->GetProfile()->GetProject())
 {
     adaptixWidget = w;
     agent         = a;
@@ -93,9 +93,9 @@ void ConsoleWidget::createUI()
     nextButton = new ClickableLabel(">");
     nextButton->setCursor( Qt::PointingHandCursor );
 
-    searchLabel    = new QLabel("0 of 0");
+    searchLabel    = new QLabel(tr("0 of 0"));
     searchLineEdit = new QLineEdit();
-    searchLineEdit->setPlaceholderText("Find");
+    searchLineEdit->setPlaceholderText(tr("Find"));
     searchLineEdit->setMaximumWidth(300);
 
     searchInput = new KPH_SearchInput(searchLineEdit, this);
@@ -188,7 +188,7 @@ void ConsoleWidget::findAndHighlightAll(const QString &pattern)
 void ConsoleWidget::highlightCurrent() const
 {
     if (allSelections.isEmpty()) {
-        searchLabel->setText("0 of 0");
+        searchLabel->setText(tr("0 of 0"));
         return;
     }
 
@@ -204,7 +204,7 @@ void ConsoleWidget::highlightCurrent() const
 
     OutputTextEdit->setTextCursor(sels[currentIndex].cursor);
 
-    searchLabel->setText(QString("%1 of %2").arg(currentIndex + 1).arg(sels.size()));
+    searchLabel->setText(tr("%1 of %2").arg(currentIndex + 1).arg(sels.size()));
 }
 
 
@@ -343,7 +343,7 @@ void ConsoleWidget::processFileUploads(const QList<QPair<QString, QString>>& fil
             if (!success || !response.contains("ok") || !response["ok"].toBool()) {
                 cleanupHooksOnError(hookId, handlerId, hasHook, hasHandler);
                 QString errMsg = response.contains("message") ? response["message"].toString() : message;
-                MessageError(errMsg.isEmpty() ? "OTP request failed" : errMsg);
+                MessageError(errMsg.isEmpty() ? tr("OTP request failed") : errMsg);
                 return;
             }
 
@@ -434,7 +434,7 @@ void ConsoleWidget::ProcessCmdResult(const QString &commandLine, const Commander
     if (!fileTasks.isEmpty()) {
         /// Async file upload flow — non-blocking
         this->ConsoleOutputPrompt(0, "", "", commandLine);
-        this->ConsoleOutputMessage(0, "", CONSOLE_OUT_LOCAL_INFO, "Uploading file(s) to server...", "", false);
+        this->ConsoleOutputMessage(0, "", CONSOLE_OUT_LOCAL_INFO, tr("Uploading file(s) to server..."), "", false);
 
         processFileUploads(fileTasks, 0, cmdResult.data, commandLine, UI,
             hookId, handlerId, cmdResult.post_hook.isSet, cmdResult.handler.isSet);
@@ -468,7 +468,7 @@ void ConsoleWidget::ProcessCmdResult(const QString &commandLine, const Commander
         bool result = HttpReqGetOTP("tmp_upload", objId, *(agent->adaptixWidget->GetProfile()), &message, &ok);
         if (!result) {
             cleanupHooksOnError(hookId, handlerId, cmdResult.post_hook.isSet, cmdResult.handler.isSet);
-            MessageError("Response timeout");
+            MessageError(tr("Response timeout"));
             return;
         }
         if (!ok) {
@@ -550,7 +550,7 @@ void ConsoleWidget::handleSearch()
     if ( pattern.isEmpty() && allSelections.size() ) {
         allSelections.clear();
         currentIndex = -1;
-        searchLabel->setText("0 of 0");
+        searchLabel->setText(tr("0 of 0"));
         OutputTextEdit->setExtraSelections({});
         return;
     }
@@ -572,7 +572,7 @@ void ConsoleWidget::handleSearchBackward()
     if (pattern.isEmpty() && allSelections.size()) {
         allSelections.clear();
         currentIndex = -1;
-        searchLabel->setText("0 of 0");
+        searchLabel->setText(tr("0 of 0"));
         OutputTextEdit->setExtraSelections({});
         return;
     }

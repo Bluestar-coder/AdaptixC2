@@ -25,43 +25,43 @@ DialogListener::~DialogListener() = default;
 
 void DialogListener::createUI()
 {
-    this->setWindowTitle("Create Listener");
+    this->setWindowTitle(tr("Create Listener"));
     this->setProperty("Main", "base");
 
     listenerNameLabel = new QLabel(this);
-    listenerNameLabel->setText("Name:");
+    listenerNameLabel->setText(tr("Name:"));
 
     inputListenerName = new QLineEdit(this);
-    inputListenerName->setToolTip("Listener name");
+    inputListenerName->setToolTip(tr("Listener name"));
 
     profileLabel = new QLabel(this);
-    profileLabel->setText("Profile:");
+    profileLabel->setText(tr("Profile:"));
 
     inputProfileName = new QLineEdit(this);
-    inputProfileName->setToolTip("Profile name");
+    inputProfileName->setToolTip(tr("Profile name"));
 
     actionSaveProfile = new QAction(this);
     actionSaveProfile->setCheckable(true);
     actionSaveProfile->setChecked(true);
-    actionSaveProfile->setToolTip("Click to toggle: Save as profile");
+    actionSaveProfile->setToolTip(tr("Click to toggle: Save as profile"));
     actionSaveProfile->setIcon(QIcon(":/icons/check"));
     inputProfileName->addAction(actionSaveProfile, QLineEdit::TrailingPosition);
 
     listenerTypeLabel = new QLabel(this);
-    listenerTypeLabel->setText("Protocol:");
+    listenerTypeLabel->setText(tr("Protocol:"));
     listenerTypeCombobox = new QComboBox(this);
 
     listenerLabel = new QLabel(this);
-    listenerLabel->setText("Config:");
+    listenerLabel->setText(tr("Config:"));
     listenerCombobox = new QComboBox(this);
 
     menuContext = new QMenu(this);
-    menuContext->addAction("Rename", this, &DialogListener::onProfileRename);
-    menuContext->addAction("Remove", this, &DialogListener::onProfileRemove);
+    menuContext->addAction(tr("Rename"), this, &DialogListener::onProfileRename);
+    menuContext->addAction(tr("Remove"), this, &DialogListener::onProfileRemove);
 
     label_Profiles = new QLabel(this);
     label_Profiles->setAlignment(Qt::AlignCenter);
-    label_Profiles->setText("Profiles");
+    label_Profiles->setText(tr("Profiles"));
 
     cardWidget = new CardListWidget(this);
     cardWidget->setFixedWidth(220);
@@ -71,18 +71,18 @@ void DialogListener::createUI()
     cardWidget->setFocusPolicy(Qt::NoFocus);
 
     buttonNewProfile = new QPushButton(this);
-    buttonNewProfile->setText("New Profile");
+    buttonNewProfile->setText(tr("New Profile"));
     buttonNewProfile->setMinimumSize(QSize(10, 30));
 
     buttonLoad = new QPushButton(QIcon(":/icons/file_open"), "", this);
     buttonLoad->setIconSize(QSize(20, 20));
     buttonLoad->setFixedSize(QSize(30, 30));
-    buttonLoad->setToolTip("Load profile from file");
+    buttonLoad->setToolTip(tr("Load profile from file"));
 
     buttonSave = new QPushButton(QIcon(":/icons/save_as"), "", this);
     buttonSave->setIconSize(QSize(20, 20));
     buttonSave->setFixedSize(QSize(30, 30));
-    buttonSave->setToolTip("Save profile to file");
+    buttonSave->setToolTip(tr("Save profile to file"));
 
     auto profileButtonsLayout = new QHBoxLayout();
     profileButtonsLayout->addWidget(buttonNewProfile);
@@ -103,13 +103,13 @@ void DialogListener::createUI()
     stackGridLayout->addWidget(configStackWidget, 0, 0, 1, 1 );
 
     listenerConfigGroupbox = new QGroupBox(this);
-    listenerConfigGroupbox->setTitle("Listener config");
+    listenerConfigGroupbox->setTitle(tr("Listener config"));
     listenerConfigGroupbox->setAlignment(Qt::AlignHCenter);
     listenerConfigGroupbox->setLayout(stackGridLayout);
 
     buttonCreate = new QPushButton(this);
     buttonCreate->setDefault(true);
-    buttonCreate->setText("Create");
+    buttonCreate->setText(tr("Create"));
     buttonCreate->setFixedWidth(160);
     buttonCreate->setFocus();
 
@@ -205,8 +205,9 @@ void DialogListener::AddExListeners(const QList<RegListenerConfig> &listeners, c
         QString type = listener.type + " (" + listener.protocol + ")";
         listenersSet.insert(type);
     }
-    listenerTypeCombobox->addItem("any");
-    listenerTypeCombobox->addItems(QList<QString>(listenersSet.begin(), listenersSet.end()));
+    listenerTypeCombobox->addItem(tr("Any"), "any");
+    for (const auto& type : listenersSet)
+        listenerTypeCombobox->addItem(type, type);
 }
 
 void DialogListener::SetProfile(const AuthProfile &profile)
@@ -217,17 +218,17 @@ void DialogListener::SetProfile(const AuthProfile &profile)
 
 void DialogListener::SetEditMode(const QString &name)
 {
-    this->setWindowTitle( "Edit Listener" );
+    this->setWindowTitle(tr("Edit Listener"));
     inputListenerName->setText(name);
     inputListenerName->setDisabled(true);
     listenerCombobox->setDisabled(true);
     listenerTypeCombobox->setDisabled(true);
-    buttonCreate->setText("Edit");
+    buttonCreate->setText(tr("Edit"));
     editMode = true;
 
     inputProfileName->setReadOnly(true);
-    inputProfileName->setToolTip("Profile name (read-only in edit mode)");
-    actionSaveProfile->setToolTip("Click to toggle: Update profile data in database");
+    inputProfileName->setToolTip(tr("Profile name (read-only in edit mode)"));
+    actionSaveProfile->setToolTip(tr("Click to toggle: Update profile data in database"));
 
     cardWidget->setEnabled(false);
     buttonNewProfile->setEnabled(false);
@@ -247,10 +248,12 @@ void DialogListener::changeConfig(const QString &fn)
 
 void DialogListener::changeType(const QString &type)
 {
+    Q_UNUSED(type);
     listenerCombobox->clear();
+    const QString selectedType = listenerTypeCombobox->currentData().toString();
     for (auto listener : listeners) {
         QString listenerType = listener.type + " (" + listener.protocol + ")";
-        if (listenerType == type || type == "any")
+        if (listenerType == selectedType || selectedType == "any")
             listenerCombobox->addItem(listener.name);
     }
 }
@@ -267,7 +270,7 @@ void DialogListener::onButtonCreate()
         configData = ax_uis[configType].container->toJson();
 
     buttonCreate->setEnabled(false);
-    buttonCreate->setText(editMode ? "Editing..." : "Creating...");
+    buttonCreate->setText(editMode ? tr("Editing...") : tr("Creating..."));
 
     bool isEditMode = editMode;
     QPointer<DialogListener> safeThis = this;
@@ -277,7 +280,7 @@ void DialogListener::onButtonCreate()
             MessageError(message);
             if (safeThis) {
                 safeThis->buttonCreate->setEnabled(true);
-                safeThis->buttonCreate->setText(isEditMode ? "Edit" : "Create");
+                safeThis->buttonCreate->setText(isEditMode ? DialogListener::tr("Edit") : DialogListener::tr("Create"));
             }
         } else {
             if (safeThis) {
@@ -313,7 +316,7 @@ void DialogListener::onButtonLoad()
     QString baseDir = authProfile.GetProjectDir();
     QPointer<DialogListener> safeThis = this;
 
-    NonBlockingDialogs::getOpenFileName(this, "Select file", baseDir, "JSON files (*.json)",
+    NonBlockingDialogs::getOpenFileName(this, tr("Select file"), baseDir, tr("JSON files (*.json)"),
         [safeThis](const QString& filePath) {
             if (filePath.isEmpty())
                 return;
@@ -328,17 +331,17 @@ void DialogListener::onButtonLoad()
             QJsonParseError parseError;
             QJsonDocument document = QJsonDocument::fromJson(fileContent, &parseError);
             if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
-                MessageError("Error JSON parse");
+                MessageError(DialogListener::tr("Error parsing JSON"));
                 return;
             }
             QJsonObject jsonObject = document.object();
 
             if ( !jsonObject.contains("type") || !jsonObject["type"].isString() ) {
-                MessageError("Required parameter 'type' is missing");
+                MessageError(DialogListener::tr("Required parameter 'type' is missing"));
                 return;
             }
             if ( !jsonObject.contains("config") || !jsonObject["config"].isString() ) {
-                MessageError("Required parameter 'config' is missing");
+                MessageError(DialogListener::tr("Required parameter 'config' is missing"));
                 return;
             }
 
@@ -352,7 +355,7 @@ void DialogListener::onButtonLoad()
             int typeIndex = safeThis->listenerCombobox->findText( configType );
 
             if(typeIndex == -1 || !safeThis->ax_uis.contains(configType)) {
-                MessageError("No such listener exists");
+                MessageError(DialogListener::tr("No such listener exists"));
                 return;
             }
 
@@ -380,14 +383,14 @@ void DialogListener::onButtonSave()
     QString tmpFilename = configName + "_listener_config.json";
     QString baseDir     = authProfile.GetProjectDir();
     QString initialPath = QDir(baseDir).filePath(tmpFilename);
-    NonBlockingDialogs::getSaveFileName(this, "Save File", initialPath, "JSON files (*.json)",
+    NonBlockingDialogs::getSaveFileName(this, tr("Save File"), initialPath, tr("JSON files (*.json)"),
         [this, fileContent](const QString& filePath) {
             if (filePath.isEmpty())
                 return;
 
             QFile file(filePath);
             if (!file.open(QIODevice::WriteOnly)) {
-                MessageError("Failed to open file for writing");
+                MessageError(tr("Failed to open file for writing"));
                 return;
             }
 
@@ -395,8 +398,8 @@ void DialogListener::onButtonSave()
             file.close();
 
             QInputDialog inputDialog;
-            inputDialog.setWindowTitle("Save config");
-            inputDialog.setLabelText("File saved to:");
+            inputDialog.setWindowTitle(tr("Save config"));
+            inputDialog.setLabelText(tr("File saved to:"));
             inputDialog.setTextEchoMode(QLineEdit::Normal);
             inputDialog.setTextValue(filePath);
             inputDialog.adjustSize();
@@ -470,7 +473,7 @@ void DialogListener::onProfileSelected()
     QJsonParseError parseError;
     QJsonDocument document = QJsonDocument::fromJson(profileData.toUtf8(), &parseError);
     if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
-        MessageError("Error parsing profile data");
+        MessageError(tr("Error parsing profile data"));
         return;
     }
 
@@ -534,7 +537,7 @@ void DialogListener::onProfileRename()
         return;
 
     bool ok;
-    QString newName = QInputDialog::getText(this, "Rename Profile", "New profile name:", 
+    QString newName = QInputDialog::getText(this, tr("Rename Profile"), tr("New profile name:"),
                                              QLineEdit::Normal, oldName, &ok);
     if (!ok || newName.trimmed().isEmpty() || newName == oldName)
         return;

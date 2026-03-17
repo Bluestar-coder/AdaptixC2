@@ -1,4 +1,5 @@
 #include <Utils/Logs.h>
+#include <QCoreApplication>
 
 void LogInfo(const char* format, ...)
 {
@@ -33,7 +34,7 @@ void LogError(const char* format, ...)
 void MessageError(const QString &message )
 {
     auto box = QMessageBox();
-    box.setWindowTitle( "Error" );
+    box.setWindowTitle(QCoreApplication::translate("MessageUtils", "Error"));
     box.setText( message );
     box.setIcon( QMessageBox::Critical );
     box.exec();
@@ -42,7 +43,7 @@ void MessageError(const QString &message )
 void MessageSuccess(const QString &message )
 {
     auto box = QMessageBox();
-    box.setWindowTitle( "Success" );
+    box.setWindowTitle(QCoreApplication::translate("MessageUtils", "Success"));
     box.setText( message );
     box.setIcon( QMessageBox::Information );
     box.exec();

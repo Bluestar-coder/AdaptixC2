@@ -11,6 +11,8 @@ class Settings
     MainAdaptix*    mainAdaptix    = nullptr;
     DialogSettings* dialogSettings = nullptr;
 
+    static QString DetectDefaultLanguage();
+
 public:
     explicit Settings(MainAdaptix* m);
     ~Settings();

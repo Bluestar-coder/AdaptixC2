@@ -60,12 +60,12 @@ TasksWidget::TasksWidget( AdaptixWidget* w )
     taskOutputConsole = new TaskOutputWidget();
 
     dockWidgetTable = new KDDockWidgets::QtWidgets::DockWidget( + "Tasks:Dock-" + w->GetProfile()->GetProject(), KDDockWidgets::DockWidgetOption_None, KDDockWidgets::LayoutSaverOption::None);
-    dockWidgetTable->setTitle("Tasks");
+    dockWidgetTable->setTitle(tr("Tasks"));
     dockWidgetTable->setWidget(this);
     dockWidgetTable->setIcon(QIcon( ":/icons/job" ), KDDockWidgets::IconPlace::TabBar);
 
     dockWidgetOutput = new KDDockWidgets::QtWidgets::DockWidget( + "Task Output:Dock-" + w->GetProfile()->GetProject(), KDDockWidgets::DockWidgetOption_None, KDDockWidgets::LayoutSaverOption::None);
-    dockWidgetOutput->setTitle("Task Output");
+    dockWidgetOutput->setTitle(tr("Task Output"));
     dockWidgetOutput->setWidget(taskOutputConsole);
     dockWidgetOutput->setIcon(QIcon( ":/icons/job" ), KDDockWidgets::IconPlace::TabBar);
 
@@ -143,7 +143,7 @@ void TasksWidget::flushPendingTasks()
 
     for (const QString& agentId : agents) {
         if (comboAgent->findText(agentId) == -1)
-            comboAgent->addItem(agentId);
+            comboAgent->addItem(agentId, agentId);
     }
 
     pendingTasks.clear();
@@ -157,26 +157,31 @@ void TasksWidget::createUI()
     searchWidget->setVisible(false);
 
     inputFilter = new QLineEdit(searchWidget);
-    inputFilter->setPlaceholderText("filter: (adm | user) & cmd");
+    inputFilter->setPlaceholderText(tr("filter: (adm | user) & cmd"));
     inputFilter->setMaximumWidth(250);
 
-    autoSearchCheck = new QCheckBox("auto", searchWidget);
+    autoSearchCheck = new QCheckBox(tr("auto"), searchWidget);
     autoSearchCheck->setChecked(true);
-    autoSearchCheck->setToolTip("Auto search on text change. If unchecked, press Enter to search.");
+    autoSearchCheck->setToolTip(tr("Auto search on text change. If unchecked, press Enter to search."));
 
     comboAgent = new QComboBox(searchWidget);
     comboAgent->setMinimumWidth(120);
     comboAgent->setEditable(true);
     comboAgent->setInsertPolicy(QComboBox::NoInsert);
-    comboAgent->addItem("All agents");
+    comboAgent->addItem(tr("All agents"), "");
 
     comboType = new QComboBox(searchWidget);
     comboType->setMinimumWidth(100);
-    comboType->addItem("All types");
+    comboType->addItem(tr("All types"), "");
 
     comboStatus = new QComboBox(searchWidget);
     comboStatus->setMinimumWidth(100);
-    comboStatus->addItems(QStringList() << "Any status" << "Hosted" << "Running" << "Success" << "Error" << "Canceled");
+    comboStatus->addItem(tr("Any status"), "");
+    comboStatus->addItem(TasksTableModel::statusDisplay("Hosted"), "Hosted");
+    comboStatus->addItem(TasksTableModel::statusDisplay("Running"), "Running");
+    comboStatus->addItem(TasksTableModel::statusDisplay("Success"), "Success");
+    comboStatus->addItem(TasksTableModel::statusDisplay("Error"), "Error");
+    comboStatus->addItem(TasksTableModel::statusDisplay("Canceled"), "Canceled");
 
     hideButton = new ClickableLabel("  x  ");
     hideButton->setCursor(Qt::PointingHandCursor);
@@ -349,9 +354,9 @@ void TasksWidget::Clear() const
 
     tasksModel->clear();
     comboAgent->clear();
-    comboAgent->addItem("All agents");
+    comboAgent->addItem(tr("All agents"), "");
     comboType->clear();
-    comboType->addItem("All types");
+    comboType->addItem(tr("All types"), "");
     comboStatus->setCurrentIndex(0);
     inputFilter->clear();
 }
@@ -388,8 +393,8 @@ void TasksWidget::handleTasksMenu( const QPoint &pos )
         QModelIndex sourceIndex = proxyModel->mapToSource(proxyIndex);
         if (!sourceIndex.isValid()) continue;
 
-        QString result = tasksModel->data(tasksModel->index(sourceIndex.row(), TC_Result), Qt::DisplayRole).toString();
-        QString type   = tasksModel->data(tasksModel->index(sourceIndex.row(), TC_TaskType), Qt::DisplayRole).toString();
+        QString result = tasksModel->data(tasksModel->index(sourceIndex.row(), TC_Result), Qt::UserRole).toString();
+        QString type   = tasksModel->data(tasksModel->index(sourceIndex.row(), TC_TaskType), Qt::UserRole).toString();
         QString taskId = tasksModel->data(tasksModel->index(sourceIndex.row(), TC_TaskId), Qt::DisplayRole).toString();
         taskIds.append(taskId);
 
@@ -402,10 +407,10 @@ void TasksWidget::handleTasksMenu( const QPoint &pos )
     }
 
     auto ctxMenu = QMenu();
-    ctxMenu.addAction("Copy taskID", this, &TasksWidget::actionCopyTaskId);
-    ctxMenu.addAction("Copy commandLine", this, &TasksWidget::actionCopyCmd);
+    ctxMenu.addAction(tr("Copy taskID"), this, &TasksWidget::actionCopyTaskId);
+    ctxMenu.addAction(tr("Copy commandLine"), this, &TasksWidget::actionCopyCmd);
     ctxMenu.addSeparator();
-    ctxMenu.addAction("Agent console", this, &TasksWidget::actionOpenConsole);
+    ctxMenu.addAction(tr("Agent console"), this, &TasksWidget::actionOpenConsole);
     ctxMenu.addSeparator();
 
     int taskCount = adaptixWidget->ScriptManager->AddMenuTask(&ctxMenu, "Tasks", taskIds);
@@ -416,9 +421,9 @@ void TasksWidget::handleTasksMenu( const QPoint &pos )
     ctxMenu.addSeparator();
 
     if (cancel)
-    ctxMenu.addAction("Cancel", this, &TasksWidget::actionCancel);
+    ctxMenu.addAction(tr("Cancel"), this, &TasksWidget::actionCancel);
     if (remove)
-    ctxMenu.addAction("Delete task", this, &TasksWidget::actionDelete);
+    ctxMenu.addAction(tr("Delete task"), this, &TasksWidget::actionDelete);
 
     ctxMenu.exec(tableView->viewport()->mapToGlobal(pos));
 }
@@ -448,9 +453,13 @@ void TasksWidget::onFilterChanged() const
     auto *f = qobject_cast<TasksFilterProxyModel *>(proxyModel);
     if (!f) return;
 
-    f->setAgentFilter(comboAgent->currentText());
-    f->setTypeFilter(comboType->currentText());
-    f->setStatusFilter(comboStatus->currentText());
+    QString agentFilter = comboAgent->currentData().toString();
+    if (agentFilter.isEmpty())
+        agentFilter = comboAgent->currentText() == tr("All agents") ? QString() : comboAgent->currentText();
+
+    f->setAgentFilter(agentFilter);
+    f->setTypeFilter(comboType->currentData().toString());
+    f->setStatusFilter(comboStatus->currentData().toString());
     if (autoSearchCheck->isChecked()) {
         f->setTextFilter(inputFilter->text());
     }
@@ -471,31 +480,35 @@ void TasksWidget::UpdateFilterComboBoxes() const
         types.insert(typeStr);
     }
 
-    QString currentAgent = comboAgent->currentText();
-    QString currentType = comboType->currentText();
+    QString currentAgent = comboAgent->currentData().toString();
+    if (currentAgent.isEmpty() && comboAgent->currentText() != tr("All agents"))
+        currentAgent = comboAgent->currentText();
+    QString currentType = comboType->currentData().toString();
 
     comboAgent->blockSignals(true);
     comboType->blockSignals(true);
 
     comboAgent->clear();
-    comboAgent->addItem("All agents");
+    comboAgent->addItem(tr("All agents"), "");
     QStringList agentList = agents.values();
     agentList.sort();
-    comboAgent->addItems(agentList);
+    for (const auto& agent : agentList)
+        comboAgent->addItem(agent, agent);
 
     comboType->clear();
-    comboType->addItem("All types");
+    comboType->addItem(tr("All types"), "");
     QStringList typeList = types.values();
     typeList.sort();
-    comboType->addItems(typeList);
+    for (const auto& type : typeList)
+        comboType->addItem(TasksTableModel::taskTypeDisplay(type), type);
 
-    int agentIdx = comboAgent->findText(currentAgent);
+    int agentIdx = comboAgent->findData(currentAgent);
     if (agentIdx >= 0)
         comboAgent->setCurrentIndex(agentIdx);
     else
         comboAgent->setCurrentText(currentAgent);
 
-    int typeIdx = comboType->findText(currentType);
+    int typeIdx = comboType->findData(currentType);
     if (typeIdx >= 0)
         comboType->setCurrentIndex(typeIdx);
     else

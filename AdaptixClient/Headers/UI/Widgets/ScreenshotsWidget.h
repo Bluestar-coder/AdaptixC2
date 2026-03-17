@@ -180,8 +180,14 @@ public:
         if (role != Qt::DisplayRole || o != Qt::Horizontal)
             return {};
 
-        static QStringList headers = {"Id", "User", "Computer", "Note", "Date"};
-        return headers.value(section);
+        switch (section) {
+            case SCR_ScreenId: return tr("Id");
+            case SCR_User:     return tr("User");
+            case SCR_Computer: return tr("Computer");
+            case SCR_Note:     return tr("Note");
+            case SCR_Date:     return tr("Date");
+            default:           return {};
+        }
     }
 
     void add(const ScreenData& item) {
